@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#if defined(__APPLE__)
+#include <pthread.h>
+#endif
 #include <RED4ext/CName.hpp>
 #include <RED4ext/Containers/DynArray.hpp>
 #include <RED4ext/HashMap.hpp>
@@ -228,7 +231,19 @@ struct ScriptBundle
     DynArray<CString> strings;                           // F0
     HashMap<CName, void*> unk100;                        // 100
     SharedSpinLock typesLock;                            // 130
+#if defined(__APPLE__)
+    // macOS: a recursive pthread mutex (ctor 0x1021ECDAC: pthread_mutex_init(this+0x138); dtor 0x1021ECFD8:
+    // pthread_mutex_destroy(this+0x138)). Every field before it is at its Windows offset (see macos/ADDRESSES.md).
+    pthread_mutex_t unk138;                              // 138
+#else
     CRITICAL_SECTION unk138;                             // 138
+#endif
 };
+#if defined(__APPLE__)
+RED4EXT_ASSERT_SIZE(ScriptBundle, 0x178);
+#else
 RED4EXT_ASSERT_SIZE(ScriptBundle, 0x160);
+#endif
+RED4EXT_ASSERT_OFFSET(ScriptBundle, classes, 0xD0);
+RED4EXT_ASSERT_OFFSET(ScriptBundle, typesLock, 0x130);
 }

@@ -13,7 +13,9 @@
 #include "App/World/OpenWorldTracker.hpp"
 #include "Core/Foundation/LocaleProvider.hpp"
 #include "Core/Foundation/RuntimeProvider.hpp"
+#if defined(_WIN32) || defined(_WIN64)
 #include "Support/MinHook/MinHookProvider.hpp"
+#endif
 #include "Support/RED4ext/RED4extProvider.hpp"
 #include "Support/RedLib/RedLibProvider.hpp"
 #include "Support/Spdlog/SpdlogProvider.hpp"
@@ -21,6 +23,7 @@
 App::Application::Application(HMODULE aHandle, const RED4ext::v1::Sdk* aSdk)
 {
     Register<Core::LocaleProvider>();
+#if defined(_WIN32) || defined(_WIN64)
     Register<Core::RuntimeProvider>(aHandle)
         ->SetBaseImagePathDepth(2);
 
@@ -31,6 +34,21 @@ App::Application::Application(HMODULE aHandle, const RED4ext::v1::Sdk* aSdk)
     Register<Support::RED4extProvider>(aHandle, aSdk)
         ->EnableAddressLibrary()
         ->RegisterScripts(Env::ScriptsDir());
+#else
+    // macOS: the game root is three levels above the executable (Cyberpunk2077.app/Contents/MacOS/Cyberpunk2077).
+    // Hooks go through RED4ext's native hook engine and addresses through the verified address database (see
+    // macos/PORT_NOTES.md); there is no MinHook.
+    Register<Core::RuntimeProvider>(aHandle)
+        ->SetBaseImagePathDepth(3);
+
+    Register<Support::SpdlogProvider>()
+        ->AppendTimestampToLogName()
+        ->CreateRecentLogSymlink();
+    Register<Support::RED4extProvider>(aHandle, aSdk)
+        ->EnableHooking()
+        ->EnableAddressLibrary()
+        ->RegisterScripts(Env::ScriptsDir());
+#endif
     Register<Support::RedLibProvider>();
 
     Register<App::ScriptingService>(Env::PersistentDir());

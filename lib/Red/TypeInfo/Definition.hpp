@@ -667,7 +667,7 @@ public:
 template<typename TClass>
 class ClassDescriptorDefaultImpl : public ClassDescriptor<TClass>
 {
-    const bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
+    bool IsEqual(const void* aLhs, const void* aRhs, uint32_t a3) final // 48
     {
         if constexpr (Detail::IsConstructionForwarded<TClass>)
         {
@@ -1000,7 +1000,12 @@ struct SystemBuilder
 
         gameInstance->systemMap.Insert(systemType, systemInstance);
         gameInstance->systemImplementations.Insert(systemType, systemType);
+#if defined(__APPLE__)
+        // clang finds Handle(T*) and the copy constructor equally good for Handle<TSystem>; pick the copy explicitly.
+        gameInstance->systemInstances.EmplaceBack(static_cast<const Handle<IScriptable>&>(systemInstance));
+#else
         gameInstance->systemInstances.EmplaceBack(systemInstance);
+#endif
     }
 
     static inline Handle<TSystem> BuildSystem()
