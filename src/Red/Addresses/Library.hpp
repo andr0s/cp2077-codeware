@@ -58,7 +58,7 @@ constexpr uint32_t InkLogicController_OnArrangeChildrenComplete = RED_ADDRESS_MA
 
 constexpr uint32_t InkSpawner_FinishAsyncSpawn = 2698985195;
 
-constexpr uint32_t InkSystem_Instance = RED_ADDRESS_MACOS_UNAVAILABLE(2635337807);
+constexpr uint32_t InkSystem_Instance = 2635337807;
 constexpr uint32_t InkSystem_ProcessCharacterEvent = RED_ADDRESS_MACOS_UNAVAILABLE(4284882427);
 constexpr uint32_t InkSystem_ProcessInputEvents = RED_ADDRESS_MACOS_UNAVAILABLE(673454961);
 

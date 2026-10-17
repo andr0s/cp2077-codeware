@@ -49,8 +49,16 @@ void App::StaticEntitySystem::OnAfterWorldDetach()
 
 void App::StaticEntitySystem::OnRegisterUpdates(Red::UpdateRegistrar* aRegistrar)
 {
+#if defined(__APPLE__)
+    // macOS: UpdateRegistrar::RegisterUpdate goes through the SDK hash UpdateRegistrar_RegisterGroupUpdate, which is
+    // not verified in the macOS address database (its DB value is wrong; the function is 0x103D95800, see
+    // macos/ADDRESSES.md). Compiling the call in would make RED4ext refuse the plugin, so the tick is not registered
+    // and disposed static entities are not pruned from the bookkeeping.
+    (void)aRegistrar;
+#else
     aRegistrar->RegisterUpdate(Red::UpdateTickGroup::FrameBegin, this, "StaticEntitySystem/Tick",
                                {this, &StaticEntitySystem::OnUpdateTick});
+#endif
 }
 
 void App::StaticEntitySystem::OnUpdateTick(Red::FrameInfo& aFrame, Red::JobQueue& aJobQueue)

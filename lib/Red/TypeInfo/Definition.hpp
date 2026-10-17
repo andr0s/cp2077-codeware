@@ -6,6 +6,10 @@
 #include "Resolving.hpp"
 #include "Macros/Definition.hpp"
 
+#if defined(__APPLE__)
+#include <dlfcn.h>
+#endif
+
 #ifndef RTTI_DIRECT_RETURNS
 #define RTTI_DIRECT_RETURNS true
 #endif
@@ -14,6 +18,77 @@ namespace Red
 {
 template<Scope>
 struct TypeInfoBuilder;
+
+#if defined(__APPLE__)
+namespace Detail
+{
+// macOS: the vtable the game's CEnum constructor (0x1021A33E0) stores in every native enum (0x106FFC2B8 in 2.3.1),
+// read at runtime from the native enums already registered in the RTTI type map (CRTTISystem +0x10, same layout as the
+// SDK, docs/re/reflection_layout.md). Two native enums must agree, and it must point into the game executable.
+inline void* GetNativeEnumVtable()
+{
+    static void* s_vtable = []() -> void*
+    {
+        void* vtable = nullptr;
+        uint32_t agreeing = 0;
+        bool conflict = false;
+
+        CRTTISystem::Get()->types.ForEach([&](const CName&, rtti::IType*& aType) {
+            if (conflict || agreeing >= 4 || !aType || aType->GetType() != rtti::ERTTIType::Enum)
+                return;
+
+            if (reinterpret_cast<CEnum*>(aType)->flags.isScripted)
+                return;
+
+            auto* candidate = *reinterpret_cast<void**>(aType);
+            if (!vtable)
+                vtable = candidate;
+            else if (candidate != vtable)
+                conflict = true;
+            ++agreeing;
+        });
+
+        if (conflict || agreeing < 2)
+            return nullptr;
+
+        Dl_info info{};
+        if (!dladdr(vtable, &info) || info.dli_fbase != reinterpret_cast<void*>(RelocBase::GetImageBase()))
+            return nullptr;
+
+        return vtable;
+    }();
+
+    return s_vtable;
+}
+
+// Builds a plugin enum the way the game's CEnum constructor does, without instantiating the SDK's CEnum (see above).
+template<class TDescriptor>
+inline TDescriptor* CreateNativeEnum(uint8_t aSize)
+{
+    static_assert(sizeof(TDescriptor) == sizeof(CEnum));
+
+    auto* vtable = GetNativeEnumVtable();
+    if (!vtable)
+        return nullptr;
+
+    auto* memory = Memory::RTTIAllocator::Get()->Alloc(sizeof(CEnum)).memory;
+    if (!memory)
+        return nullptr;
+
+    std::memset(memory, 0, sizeof(CEnum));
+    *reinterpret_cast<void**>(memory) = vtable;
+
+    auto* type = reinterpret_cast<TDescriptor*>(memory);
+    type->actualSize = aSize;
+    new (&type->hashList) DynArray<CName>(Memory::RTTIAllocator::Get());
+    new (&type->valueList) DynArray<int64_t>(Memory::RTTIAllocator::Get());
+    new (&type->aliasList) DynArray<CName>(Memory::RTTIAllocator::Get());
+    new (&type->aliasValueList) DynArray<int64_t>(Memory::RTTIAllocator::Get());
+
+    return type;
+}
+}
+#endif
 
 namespace Detail
 {
@@ -1149,7 +1224,16 @@ struct EnumDefinition
     {
         constexpr auto name = GetTypeNameStr<TEnum>();
 
+#if defined(__APPLE__)
+        // macOS: an SDK CEnum would bring its ToString/FromString/Unserialize overrides and the rtti::IType base
+        // virtuals into the binary, whose macOS addresses are not verified (RED4ext refuses such a plugin). The enum
+        // is built on the game's own CEnum vtable instead, exactly like the game's native enums.
+        auto* type = Detail::CreateNativeEnum<Descriptor>(sizeof(TEnum));
+        if (!type)
+            return;
+#else
         auto* type = new Descriptor();
+#endif
         type->name = CNamePool::Add(name.data());
 
         if constexpr (Detail::HasRegisterHandler<Specialization, Descriptor>)
