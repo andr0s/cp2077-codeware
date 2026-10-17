@@ -4,6 +4,14 @@
 App::ScriptableServiceContainer::ScriptableServiceContainer(const std::filesystem::path& aStateDir)
     : m_stateFilePath((aStateDir / Red::GetTypeNameStr<ScriptableServiceContainer>().data()).replace_extension(".dat"))
 {
+#if defined(__APPLE__)
+    if (!Raw::ObjectSerializer::Prepare || !Raw::ObjectSerializer::WriteObject || !Raw::ObjectSerializer::ReadObject)
+    {
+        LogWarning("[macOS] Saving ScriptableService state between sessions is not available on macOS; "
+                   "services start with a fresh state.");
+    }
+#endif
+
     LoadState();
 }
 

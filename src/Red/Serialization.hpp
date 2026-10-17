@@ -123,6 +123,12 @@ struct ObjectSerializer
     {
         constexpr uint32_t MagicSizeLimit = 1337;
 
+#if defined(__APPLE__)
+        // macOS: without the game's object serializer nothing is written (no empty state files).
+        if (!Raw::ObjectSerializer::Prepare || !Raw::ObjectSerializer::WriteObject)
+            return;
+#endif
+
         Core::Hook::Before<Raw::ObjectSerializer::Prepare>(+[](void*, Red::ObjectSerializerParams* aParams) {
             if (aParams->sizeLimit == MagicSizeLimit)
             {
@@ -142,6 +148,12 @@ struct ObjectSerializer
     template<class T>
     inline static void ReadFromFile(Red::Handle<T>& aObject, const std::filesystem::path& aPath)
     {
+#if defined(__APPLE__)
+        // macOS: without the game's object serializer nothing is read.
+        if (!Raw::ObjectSerializer::ReadObject)
+            return;
+#endif
+
         auto allocator = Red::RawBuffer::AllocatorType::Get();
         Red::DataBuffer buffer;
 
