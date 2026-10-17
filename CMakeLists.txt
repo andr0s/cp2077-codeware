@@ -119,4 +119,24 @@ target_compile_options(Codeware PRIVATE
     -fvisibility-inlines-hidden
 )
 
+# Install layout, relative to the game folder: cmake --install build --prefix "<Cyberpunk 2077 folder>"
+#   red4ext/plugins/Codeware/Codeware.dylib, Scripts/ (redscript sources), Data/KnownHashes.txt, licenses
+set(CODEWARE_PLUGIN_DIR "red4ext/plugins/Codeware")
+install(TARGETS Codeware LIBRARY DESTINATION "${CODEWARE_PLUGIN_DIR}")
+# These imports declare Windows-only game types that the macOS game does not have (input Win32/editor systems, Windows
+# game services, FSR 3.0 data, Jira/OAuth tools, a removed menu state). The script validator would stop script loading
+# with "Missing native class". No other script refers to them.
+install(DIRECTORY scripts/ DESTINATION "${CODEWARE_PLUGIN_DIR}/Scripts"
+    FILES_MATCHING PATTERN "*.reds"
+    PATTERN "FSR30CustomData.reds" EXCLUDE
+    PATTERN "gsmMenuState_LoadSession.reds" EXCLUDE
+    PATTERN "inputInputSystemEditor.reds" EXCLUDE
+    PATTERN "inputInputSystemWin32Base.reds" EXCLUDE
+    PATTERN "inputInputSystemWin32Game.reds" EXCLUDE
+    PATTERN "oauthAuthenticationToken.reds" EXCLUDE
+    PATTERN "servicesGameServicesWin.reds" EXCLUDE
+    PATTERN "toolsJiraService.reds" EXCLUDE)
+install(DIRECTORY data/ DESTINATION "${CODEWARE_PLUGIN_DIR}/Data")
+install(FILES LICENSE THIRD_PARTY_LICENSES DESTINATION "${CODEWARE_PLUGIN_DIR}")
+
 message(STATUS "Codeware ${PROJECT_VERSION} configured")
