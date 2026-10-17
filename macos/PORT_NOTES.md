@@ -27,7 +27,8 @@ Status: source-complete and syntax-checked; **not built, not run, not tested in 
    events (macOS US-ANSI character mapping from CGEventSource modifier state), localization providers.
 5. **Everything else.** Resource depot and references, mesh appearance helpers, physics trace hit objects, weather,
    vehicle garage, quest node execution, open world activity tracking, journal and mappin helpers, community and
-   population spawner wrappers, persistency service, string/hash/bit utilities.
+   population spawner wrappers, persistency service, world node instance accessors, streaming sector node buffers,
+   the streaming world getter, wardrobe ForgetItemID, string/hash/bit utilities.
 
 ## Compiled out or stubbed on macOS (each logs one line when used)
 
@@ -37,7 +38,6 @@ Status: source-complete and syntax-checked; **not built, not run, not tested in 
 | IScriptable/ISerializable `Clone` | no generic deep clone function exists on macOS (re_res.md §2); returns null |
 | `CommunityEntryWrapper.GetRestoredEntityIDs` | that array holds 0x28-byte restore records on macOS, not entity IDs; returns empty |
 | `WorkspotGameSystem.GetWorkspotInstance` | lookup inlined; map layout/hash and instance property offsets differ or are unverified; returns null |
-| worldINodeInstance accessors, worldStreamingSector node buffer, `WorldStateSystem.GetStreamingWorld`, `WardrobeSystem.ForgetItemID` | field offsets not verified on macOS (an RE pass on them was still running at hand-off); return defaults |
 | StaticEntitySystem tick (prunes disposed static entities) | needs the SDK hash UpdateRegistrar_RegisterGroupUpdate, which is unverified in the database |
 | Script imports `FSR30CustomData`, `gsmMenuState_LoadSession`, `inputInputSystemEditor`, `inputInputSystemWin32Base`, `inputInputSystemWin32Game`, `oauthAuthenticationToken`, `servicesGameServicesWin`, `toolsJiraService` | these classes do not exist in the macOS game (no RTTI name strings; macOS has e.g. `inputInputSystemMac`); the script validator fails the whole load on "Missing native class". Not referenced by any other script; excluded by the CMake install rules |
 | Any address not merged yet | resolves to 0: hooks are refused (feature off, logged) and direct calls are skipped and return a default value (logged once per signature) |
@@ -62,6 +62,11 @@ community spawner requests apply on the next frame (Update does not flush them o
   provider with hooking and address library, spdlog file logging); `Core::Map` keeps the tsl-style `key()/value()`
   iterator API on `std::unordered_map`; `std::hash` for 64-bit game keys; plugin enums built on the game's CEnum
   vtable (the SDK CEnum overrides use unverified hashes).
+- **Layouts read directly** (Codeware's `OffsetPtr`s): checked on macOS in `_work/codeware/re_world.md` and the
+  other reports. worldINodeInstance (0x30/0x50/0x60/0x70/0x80/0x88), the setup info and sector node buffer (+0x40),
+  the streaming world handle (+0x270), the wardrobe item store (+0x48, lock +0xF4) and the entity fields are the same
+  as on Windows; the ones that differ are listed in `ADDRESSES.md`. worldBendedMeshNodeInstance's mesh handle is at
+  +0xC0 on macOS (Windows +0xA0); Codeware declares it but does not use it, so it is left unchanged.
 - **Entry point**: `src/main.cpp` tolerates a repeated Load/Unload from the macOS loader; `Application` registers the
   RED4ext hooking provider instead of MinHook and resolves the game root three levels above the executable.
 
