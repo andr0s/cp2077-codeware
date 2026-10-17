@@ -8,7 +8,11 @@ Red::NodeRef CreateNodeRef(Red::ScriptRef<Red::CString>& aReference)
 {
     Red::NodeRef nodeRef{};
     Red::StringView nodeRefStr{*aReference.ref};
+#if defined(__APPLE__)
+    nodeRef = Raw::NodeRef::Create(nodeRefStr.Data(), nodeRefStr.Length());
+#else
     Raw::NodeRef::Create(nodeRef, nodeRefStr);
+#endif
 
     return nodeRef;
 }

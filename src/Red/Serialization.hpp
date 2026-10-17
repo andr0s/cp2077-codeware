@@ -98,20 +98,34 @@ constexpr auto OnResourceReady = Core::RawFunc<
 
 namespace Raw::ObjectSerializer
 {
+#if defined(__APPLE__)
+// macOS: returns void (0x102161438).
+constexpr auto Prepare = Core::RawFunc<
+    /* addr = */ Red::AddressLib::ObjectSerializer_Prepare,
+    /* type = */ void (*)(void* a1, Red::ObjectSerializerParams* aParams)>();
+#else
 constexpr auto Prepare = Core::RawFunc<
     /* addr = */ Red::AddressLib::ObjectSerializer_Prepare,
     /* type = */ void* (*)(void* a1, Red::ObjectSerializerParams* aParams)>();
+#endif
 
 constexpr auto WriteObject = Core::RawFunc<
     /* addr = */ Red::AddressLib::ObjectSerializer_WriteToBuffer,
     /* type = */ Red::DataBuffer (*)(const Red::Handle<Red::ISerializable>& aObject,
                                      uint64_t a3, uint32_t aSizeLimit)>();
 
+#if defined(__APPLE__)
+// macOS: the object handle is returned through x8; the stream and the type are the first two arguments (0x1011D6E58).
+constexpr auto ReadObject = Core::RawFunc<
+    /* addr = */ Red::AddressLib::ObjectSerializer_ReadFromStrean,
+    /* type = */ Red::Handle<Red::ISerializable> (*)(Red::BaseStream& aStream, Red::CClass* aObjectType)>();
+#else
 constexpr auto ReadObject = Core::RawFunc<
     /* addr = */ Red::AddressLib::ObjectSerializer_ReadFromStrean,
     /* type = */ void* (*)(Red::Handle<Red::ISerializable>& aObject,
                            Red::BaseStream& aStream,
                            Red::CClass* aObjectType)>();
+#endif
 }
 
 namespace Red
@@ -166,7 +180,12 @@ struct ObjectSerializer
         in.read(reinterpret_cast<char*>(buffer.buffer.data), buffer.buffer.size);
 
         Red::DataBufferProxyStream stream(buffer);
+#if defined(__APPLE__)
+        static_cast<Red::Handle<Red::ISerializable>&>(aObject) =
+            Raw::ObjectSerializer::ReadObject(stream, Red::GetClass<T>());
+#else
         Raw::ObjectSerializer::ReadObject(aObject, stream, Red::GetClass<T>());
+#endif
 
         allocator->Free(buffer.buffer.data);
     }

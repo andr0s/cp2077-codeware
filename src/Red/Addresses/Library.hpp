@@ -29,7 +29,7 @@ constexpr uint32_t CMesh_FindAppearance = 3007126651;
 
 constexpr uint32_t CommunitySystem_Update = RED_ADDRESS_MACOS_UNAVAILABLE(1559565515);
 
-constexpr uint32_t EngineTime_Frequency = RED_ADDRESS_MACOS_UNAVAILABLE(3151104823);
+constexpr uint32_t EngineTime_Frequency = 3151104823;
 
 constexpr uint32_t Entity_Attach = 4248638169;
 constexpr uint32_t Entity_Detach = 2263681375;
@@ -91,13 +91,13 @@ constexpr uint32_t MeshAppearance_ReleaseReference = RED_ADDRESS_MACOS_UNAVAILAB
 
 constexpr uint32_t MorphTargetManager_ApplyMorphTarget = 633871992;
 
-constexpr uint32_t NodeRef_Create = RED_ADDRESS_MACOS_UNAVAILABLE(3491172781);
+constexpr uint32_t NodeRef_Create = 3491172781;
 
-constexpr uint32_t ObjectSerializer_Prepare = RED_ADDRESS_MACOS_UNAVAILABLE(1944983789);
-constexpr uint32_t ObjectSerializer_WriteToBuffer = RED_ADDRESS_MACOS_UNAVAILABLE(2646156567);
-constexpr uint32_t ObjectSerializer_ReadFromStrean = RED_ADDRESS_MACOS_UNAVAILABLE(125247621);
+constexpr uint32_t ObjectSerializer_Prepare = 1944983789;
+constexpr uint32_t ObjectSerializer_WriteToBuffer = 2646156567;
+constexpr uint32_t ObjectSerializer_ReadFromStrean = 125247621;
 
-constexpr uint32_t PersistentObject_InitializeState = RED_ADDRESS_MACOS_UNAVAILABLE(3442350580);
+constexpr uint32_t PersistentObject_InitializeState = 3442350580;
 
 constexpr uint32_t PhysicsTraceResult_GetHitObject = RED_ADDRESS_MACOS_UNAVAILABLE(2394822845);
 
@@ -113,7 +113,7 @@ constexpr uint32_t QuestPhaseInstance_ExecuteNode = RED_ADDRESS_MACOS_UNAVAILABL
 
 constexpr uint32_t QuestsSystem_CreateContext = RED_ADDRESS_MACOS_UNAVAILABLE(3144298192);
 
-constexpr uint32_t RenderData_Release = RED_ADDRESS_MACOS_UNAVAILABLE(2996308699);
+constexpr uint32_t RenderData_Release = 2996308699;
 
 constexpr uint32_t RenderProxy_SetMaterialOverride = RED_ADDRESS_MACOS_UNAVAILABLE(429336746);
 constexpr uint32_t RenderProxy_SetHighlightParams = RED_ADDRESS_MACOS_UNAVAILABLE(1093803822);
@@ -121,7 +121,7 @@ constexpr uint32_t RenderProxy_SetScanningState = RED_ADDRESS_MACOS_UNAVAILABLE(
 constexpr uint32_t RenderProxy_SetVisibility = RED_ADDRESS_MACOS_UNAVAILABLE(1790971865);
 constexpr uint32_t RenderProxy_UpdateVisibility = RED_ADDRESS_MACOS_UNAVAILABLE(2124419179);
 
-constexpr uint32_t ResourceBank_ForgetResource = RED_ADDRESS_MACOS_UNAVAILABLE(2288918343);
+constexpr uint32_t ResourceBank_ForgetResource = 2288918343;
 
 constexpr uint32_t ResourcePath_Create = 3998356057;
 
