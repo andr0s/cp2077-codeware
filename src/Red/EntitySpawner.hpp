@@ -57,6 +57,15 @@ struct EntitySpawner
 {
     SharedPtr<EntitySpawnerToken> SpawnEntity(const EntitySpawnerRequest& aRequest)
     {
+#if defined(__APPLE__)
+        // macOS: the token is returned through x8 and the request is the second argument (0x100CDD130).
+        constexpr auto SpawnEntity = Core::RawFunc<
+            /* addr = */ Red::AddressLib::EntitySpawner_SpawnEntity,
+            /* type = */ Red::SharedPtr<Red::EntitySpawnerToken> (*)(Red::EntitySpawner* aSpawner,
+                                                                     const Red::EntitySpawnerRequest& aRequest)>();
+
+        return SpawnEntity(this, aRequest);
+#else
         constexpr auto SpawnEntity = Core::RawFunc<
             /* addr = */ Red::AddressLib::EntitySpawner_SpawnEntity,
             /* type = */ void* (*)(Red::EntitySpawner* aSpawner,
@@ -66,6 +75,7 @@ struct EntitySpawner
         Red::SharedPtr<Red::EntitySpawnerToken> token;
         SpawnEntity(this, token, aRequest);
         return token;
+#endif
     }
 };
 }

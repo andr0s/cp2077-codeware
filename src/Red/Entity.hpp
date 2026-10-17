@@ -57,9 +57,16 @@ using Scene = Core::OffsetPtr<0xB8, Red::world::RuntimeScene>;
 using Status = Core::OffsetPtr<0x156, Red::EntityStatus>;
 // using Tags = Core::OffsetPtr<0x230, Red::TagList>;
 
+#if defined(__APPLE__)
+// macOS: returns void (0x100C97E28); its callers ignore the result.
+constexpr auto Assemble = Core::RawFunc<
+    /* addr = */ Red::AddressLib::Entity_Assemble,
+    /* type = */ void (*)(Red::Entity* aEntity, uintptr_t)>();
+#else
 constexpr auto Assemble = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_Assemble,
     /* type = */ bool (*)(Red::Entity* aEntity, uintptr_t)>();
+#endif
 
 constexpr auto Reassemble = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_Reassemble,
@@ -92,10 +99,17 @@ constexpr auto Detach = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_Detach,
     /* type = */ void (*)(Red::Entity* aEntity)>();
 
+#if defined(__APPLE__)
+// macOS: the record ID is returned in x0 and the spawn parameter is the second argument (0x10378A7E8).
+constexpr auto ResolveRecordID = Core::RawFunc<
+    /* addr = */ Red::AddressLib::Entity_ResolveRecordID,
+    /* type = */ Red::TweakDBID (*)(Red::Entity* aEntity, Red::populationPopulationSpawnParameter* aParam)>();
+#else
 constexpr auto ResolveRecordID = Core::RawFunc<
     /* addr = */ Red::AddressLib::Entity_ResolveRecordID,
     /* type = */ void (*)(Red::Entity* aEntity, Red::TweakDBID& aOut,
                           Red::populationPopulationSpawnParameter* aParam)>();
+#endif
 
 // constexpr auto GetComponents = Core::RawFunc<
 //     /* addr = */ Red::AddressLib::Entity_GetComponents,

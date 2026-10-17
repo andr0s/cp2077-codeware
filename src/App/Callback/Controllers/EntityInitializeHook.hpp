@@ -5,6 +5,8 @@
 #include "App/Callback/Events/EntityLifecycleEvent.hpp"
 #include "Core/Hooking/HookingAgent.hpp"
 #include "Red/Entity.hpp"
+#include "Red/Puppet.hpp"
+#include "Red/Vehicle.hpp"
 
 namespace App
 {
@@ -38,6 +40,19 @@ protected:
         {
             Raw::Entity::EntityID::Set(aEntity, aRequest->entityID);
         }
+
+#if defined(__APPLE__)
+        // As upstream's EntityRequestComponentsHook does: resolve the record ID before the event, so that record ID
+        // filters match during "Entity/Initialize".
+        if (Red::Cast<Red::gamePuppetBase>(aEntity))
+        {
+            Raw::Puppet::RecordID::Ref(aEntity) = Raw::Entity::ResolveRecordID(aEntity, aRequest->populationParam);
+        }
+        else if (Red::Cast<Red::vehicleBaseObject>(aEntity))
+        {
+            Raw::Vehicle::RecordID::Ref(aEntity) = Raw::Entity::ResolveRecordID(aEntity, aRequest->populationParam);
+        }
+#endif
 
         CallbackSystem::Get()->DispatchNativeEvent<EntityLifecycleEvent>(EventName, Red::AsWeakHandle(aEntity));
     }
