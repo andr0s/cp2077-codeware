@@ -27,8 +27,12 @@ public:
             aPhaseInstance = m_rootPhaseInstance;
         }
 
+#if defined(__APPLE__)
+        auto context = Raw::QuestsSystem::CreateContext(m_questsSystem, 1, 0, -1, -1);
+#else
         Red::QuestContext context{};
         Raw::QuestsSystem::CreateContext(m_questsSystem, &context, 1, 0, -1, -1);
+#endif
 
         context.phaseStack.PushBack(aPhaseInstance);
 
@@ -50,8 +54,12 @@ public:
             aPhaseInstance = m_rootPhaseInstance;
         }
 
+#if defined(__APPLE__)
+        auto context = Raw::QuestsSystem::CreateContext(m_questsSystem, 1, 0, -1, -1);
+#else
         Red::QuestContext context{};
         Raw::QuestsSystem::CreateContext(m_questsSystem, &context, 1, 0, -1, -1);
+#endif
 
         context.phaseStack.PushBack(aPhaseInstance);
 
@@ -71,8 +79,12 @@ public:
     {
         std::unique_lock _(m_questsSystemMutex);
 
+#if defined(__APPLE__)
+        auto context = Raw::QuestsSystem::CreateContext(m_questsSystem, 1, 0, -1, -1);
+#else
         Red::QuestContext context{};
         Raw::QuestsSystem::CreateContext(m_questsSystem, &context, 1, 0, -1, -1);
+#endif
 
         Red::DynArray<Red::QuestNodeSocket> outputSockets;
         auto res = Raw::QuestPhaseInstance::ExecutePath(m_rootPhaseInstance, context, aPhaseNodePath, aInputNodeID,

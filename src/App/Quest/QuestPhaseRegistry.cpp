@@ -259,7 +259,13 @@ bool App::QuestPhaseRegistry::RegisterMinorActivity(App::QuestPhaseGraphAccessor
 
     {
         auto journalManager = Red::GetGameSystem<Red::gameIJournalManager>();
+#if defined(__APPLE__)
+        // As on Windows, the entry found by hash is stored into the POI mappin entry handle as is.
+        static_cast<Red::Handle<Red::gameJournalEntry>&>(activity->mappinEntry) =
+            Raw::JournalManager::GetEntryByHash(journalManager, activity->mappinHash);
+#else
         Raw::JournalManager::GetEntryByHash(journalManager, activity->mappinEntry, activity->mappinHash);
+#endif
 
         if (!activity->mappinEntry)
             return false;

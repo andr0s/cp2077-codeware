@@ -172,8 +172,12 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
         if (!communityID)
             continue;
 
+#if defined(__APPLE__)
+        auto community = Raw::CommunitySystem::GetCommunity(m_communitySystem, communityID);
+#else
         Red::WeakPtr<Red::Community> community;
         Raw::CommunitySystem::GetCommunity(m_communitySystem, community, communityID);
+#endif
 
         if (!community.instance)
             continue;
@@ -191,10 +195,13 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
         {
             entry->unk2C = -1;
 
+#if !defined(__APPLE__)
+            // macOS: this array holds 0x28-byte restore records, not entity IDs (see CommunityEntryWrapper).
             for (const auto& entityID : entry->spawner->restoredEntityIDs)
             {
                 entityIDs.PushBack(entityID);
             }
+#endif
             for (const auto& entityID : entry->spawner->spawnedEntityIDs)
             {
                 entityIDs.PushBack(entityID);
@@ -217,8 +224,12 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
         if (!spawnerID)
             continue;
 
+#if defined(__APPLE__)
+        auto spawner = Raw::CommunitySystem::GetSpawner(m_communitySystem, spawnerID);
+#else
         Red::WeakPtr<Red::Spawner> spawner;
         Raw::CommunitySystem::GetSpawner(m_communitySystem, spawner, spawnerID);
+#endif
 
         if (!spawner.instance)
             continue;
@@ -284,8 +295,12 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
         Raw::CommunitySystem::ResetCommunity(m_communitySystem, communityID, {});
         Raw::CommunitySystem::Update(m_communitySystem, true);
 
+#if defined(__APPLE__)
+        auto community = Raw::CommunitySystem::GetCommunity(m_communitySystem, communityID);
+#else
         Red::WeakPtr<Red::Community> community;
         Raw::CommunitySystem::GetCommunity(m_communitySystem, community, communityID);
+#endif
 
         if (!community.instance)
             continue;
@@ -328,8 +343,12 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
 
     for (const auto& journalHash : aActivity->journalHashes)
     {
+#if defined(__APPLE__)
+        auto entry = Raw::JournalManager::GetEntryByHash(m_journalManager, journalHash);
+#else
         Red::Handle<Red::gameJournalEntry> entry;
         Raw::JournalManager::GetEntryByHash(m_journalManager, entry, journalHash);
+#endif
 
         if (!entry)
             continue;

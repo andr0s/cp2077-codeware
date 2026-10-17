@@ -12,8 +12,12 @@ struct QuestsSystemEx : Red::questQuestsSystem
 
         auto& rootPhaseInstance = Raw::QuestsSystem::RootPhase::Ref(this);
 
+#if defined(__APPLE__)
+        auto context = Raw::QuestsSystem::CreateContext(this, 1, 0, -1, -1);
+#else
         Red::QuestContext context{};
         Raw::QuestsSystem::CreateContext(this, &context, 1, 0, -1, -1);
+#endif
 
         context.phaseStack.PushBack(rootPhaseInstance);
 

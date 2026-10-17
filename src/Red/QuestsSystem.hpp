@@ -222,6 +222,16 @@ using RootPhase = Core::OffsetPtr<0x68, Red::Handle<Red::questPhaseInstance>>;
 using NodePathHashMap = Core::OffsetPtr<0x78, Red::HashMap<Red::QuestNodePathHash, Red::QuestNodePath>>;
 using FactManager = Core::OffsetPtr<0xF8, Red::FactManager*>;
 
+#if defined(__APPLE__)
+// macOS: the context is constructed in place through x8 (0x102EFA150 tail-calls the QuestContext constructor).
+constexpr auto CreateContext = Core::RawFunc<
+    /* addr = */ Red::AddressLib::QuestsSystem_CreateContext,
+    /* type = */ Red::QuestContext (*)(Red::questIQuestsSystem* aPhase,
+                                       int32_t a3 /* = 1 */,
+                                       int8_t a4 /* = 0 */,
+                                       int32_t a5 /* = 1000000 */,
+                                       int32_t a6 /* = -1 */)>();
+#else
 constexpr auto CreateContext = Core::RawFunc<
     /* addr = */ Red::AddressLib::QuestsSystem_CreateContext,
     /* type = */ void* (*)(Red::questIQuestsSystem* aPhase,
@@ -230,6 +240,7 @@ constexpr auto CreateContext = Core::RawFunc<
                            int8_t a4 /* = 0 */,
                            int32_t a5 /* = 1000000 */,
                            int32_t a6 /* = -1 */)>();
+#endif
 
 // constexpr auto StopPhase = Core::RawVFunc<
 //     /* addr = */ 0x210,

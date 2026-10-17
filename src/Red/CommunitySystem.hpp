@@ -41,6 +41,9 @@ struct Community
     virtual void GetActiveEntityIDs(DynArray<EntityID>& aOut) const = 0;
     virtual uint32_t GetActiveEntityCount() const = 0;
     virtual bool IsOwnedEntity(EntityID aEntityID) = 0;
+#if defined(__APPLE__)
+    virtual void sub_18() = 0; // macOS: a fourth virtual precedes the destructor (base vtable 0x106FACAA8)
+#endif
     virtual ~Community() = 0;
 
     EntityID id;                                      // 08
@@ -60,10 +63,19 @@ struct Spawner
     virtual void GetActiveEntityIDs(DynArray<EntityID>& aOut) const = 0;
     virtual uint32_t GetActiveEntityCount() const = 0;
     virtual bool IsOwnedEntity(EntityID aEntityID) = 0;
+#if defined(__APPLE__)
+    virtual void sub_18() = 0; // macOS: a fourth virtual precedes the destructor (vtable 0x106F359D8)
+#endif
     virtual ~Spawner() = 0;
 
+#if defined(__APPLE__)
+    EntityID id;                          // 08
+    bool active;                          // 10 (macOS: 0x101F05608 / 0x101F055EC)
+    bool initialized;                     // 11
+#else
     bool active;                          // 08
     bool initialized;                     // 09
+#endif
     WorldTransform transform;             // 20
     TweakDBID recordID;                   // 40
     CName appearanceName;                 // 48
@@ -102,10 +114,17 @@ constexpr auto ResetCommunity = Core::RawVFunc<
     /* addr = */ 0x1C8,
     /* type = */ void (Red::ICommunitySystem::*)(uint64_t aCommunityID, Red::CName aEntryName)>();
 
+#if defined(__APPLE__)
+// macOS: slot +0x230 (0x1014ACA3C): the weak pointer is returned through x8 and the ID is passed by value.
+constexpr auto GetCommunity = Core::RawVFunc<
+    /* addr = */ 0x228,
+    /* type = */ Red::WeakPtr<Red::Community> (Red::ICommunitySystem::*)(uint64_t aCommunityID)>();
+#else
 constexpr auto GetCommunity = Core::RawVFunc<
     /* addr = */ 0x228,
     /* type = */ void* (Red::ICommunitySystem::*)(Red::WeakPtr<Red::Community>& aOut, 
                                                   const uint64_t& aCommunityID)>();
+#endif
 
 constexpr auto ActivateSpawner = Core::RawVFunc<
     /* addr = */ 0x1D8,
@@ -119,9 +138,16 @@ constexpr auto ResetSpawner = Core::RawVFunc<
     /* addr = */ 0x1E8,
     /* type = */ void (Red::ICommunitySystem::*)(uint64_t aSpawnerID)>();
 
+#if defined(__APPLE__)
+// macOS: slot +0x268 (0x1014AE614): the weak pointer is returned through x8.
+constexpr auto GetSpawner = Core::RawVFunc<
+    /* addr = */ 0x260,
+    /* type = */ Red::WeakPtr<Red::Spawner> (Red::ICommunitySystem::*)(uint64_t aSpawnerID)>();
+#else
 constexpr auto GetSpawner = Core::RawVFunc<
     /* addr = */ 0x260,
     /* type = */ void* (Red::ICommunitySystem::*)(Red::WeakPtr<Red::Spawner>& aOut, uint64_t aSpawnerID)>();
+#endif
 
 constexpr auto Update = Core::RawFunc<
     /* addr = */ Red::AddressLib::CommunitySystem_Update,

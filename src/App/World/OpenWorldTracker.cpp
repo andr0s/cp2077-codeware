@@ -18,8 +18,12 @@ void App::OpenWorldTracker::OnSetPoiMappinPhase(void* aMappin, Red::gamedataMapp
         auto journalManager = Red::GetGameSystem<Red::gameIJournalManager>();
         auto& journalHash = Raw::PointOfInterestMappin::JournalHash::Ref(aMappin);
 
+#if defined(__APPLE__)
+        auto entry = Raw::JournalManager::GetEntryByHash(journalManager, journalHash);
+#else
         Red::Handle<Red::gameJournalEntry> entry;
         Raw::JournalManager::GetEntryByHash(journalManager, entry, journalHash);
+#endif
 
         if (entry)
         {

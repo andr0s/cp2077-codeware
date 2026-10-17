@@ -42,8 +42,12 @@ Red::Handle<App::CommunityWrapper> App::WorldStateSystem::GetCommunity(Red::Node
     if (!communityID)
         return {};
 
+#if defined(__APPLE__)
+    auto communityWeak = Raw::CommunitySystem::GetCommunity(m_communitySystem, communityID);
+#else
     Red::WeakPtr<Red::Community> communityWeak;
     Raw::CommunitySystem::GetCommunity(m_communitySystem, communityWeak, communityID);
+#endif
 
     auto community = communityWeak.Lock();
     if (!community)
@@ -105,8 +109,12 @@ Red::Handle<App::PopulationSpawnerWrapper> App::WorldStateSystem::GetPopulationS
     if (!spawnerID)
         return {};
 
+#if defined(__APPLE__)
+    auto spawnerWeak = Raw::CommunitySystem::GetSpawner(m_communitySystem, spawnerID);
+#else
     Red::WeakPtr<Red::Spawner> spawnerWeak;
     Raw::CommunitySystem::GetSpawner(m_communitySystem, spawnerWeak, spawnerID);
+#endif
 
     auto spawner = spawnerWeak.Lock();
     if (!spawner)

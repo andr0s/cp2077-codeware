@@ -27,7 +27,7 @@ constexpr uint32_t CGameFramework_InitializeGameInstance = 4007601841;
 constexpr uint32_t CMesh_GetAppearance = 773462733;
 constexpr uint32_t CMesh_FindAppearance = 3007126651;
 
-constexpr uint32_t CommunitySystem_Update = RED_ADDRESS_MACOS_UNAVAILABLE(1559565515);
+constexpr uint32_t CommunitySystem_Update = 1559565515;
 
 constexpr uint32_t EngineTime_Frequency = 3151104823;
 
@@ -103,15 +103,15 @@ constexpr uint32_t PhysicsTraceResult_GetHitObject = RED_ADDRESS_MACOS_UNAVAILAB
 
 constexpr uint32_t PlayerSystem_OnPlayerSpawned = 2050111212; // cp::PlayerSystem::OnPlayerMainObjectSpawned
 
-constexpr uint32_t PointOfInterestMappin_SetPhase = RED_ADDRESS_MACOS_UNAVAILABLE(803085170);
+constexpr uint32_t PointOfInterestMappin_SetPhase = 803085170;
 
 constexpr uint32_t QuestLoader_PhasePreloadCheck = RED_ADDRESS_MACOS_UNAVAILABLE(1567104722);
 
 constexpr uint32_t QuestPhaseInstance_Initialize = RED_ADDRESS_MACOS_UNAVAILABLE(3423879019);
 constexpr uint32_t QuestPhaseInstance_ExecuteGraph = RED_ADDRESS_MACOS_UNAVAILABLE(779107884);
-constexpr uint32_t QuestPhaseInstance_ExecuteNode = RED_ADDRESS_MACOS_UNAVAILABLE(3227858325);
+constexpr uint32_t QuestPhaseInstance_ExecuteNode = 3227858325;
 
-constexpr uint32_t QuestsSystem_CreateContext = RED_ADDRESS_MACOS_UNAVAILABLE(3144298192);
+constexpr uint32_t QuestsSystem_CreateContext = 3144298192;
 
 constexpr uint32_t RenderData_Release = 2996308699;
 
