@@ -1,0 +1,429 @@
+[
+  {
+    "hash": "1559305924",
+    "name": "GetScriptGameInstance",
+    "offset": "1:0x1F42944",
+    "evidence": "Handler of the global native \"GetGameInstance\": its registration 0x101F43A20 passes 0x101F42944 as x3 to the CGlobalFunction ctor thunk 0x102173AD4. Body: ++frame->code, builds the ScriptGameInstance in ret (x2). Native handler signature (ctx, frame, ret, type) matches. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "4007601841",
+    "name": "CGameFramework_InitializeGameInstance",
+    "offset": "1:0x3F0D900",
+    "evidence": "Job lambda labelled \"CGameFramework/GameInstance\", dispatched by the CGameFramework ctor 0x103F0D2AC; it loads the GameInstance from the capture and calls its vt+0x28 (GameInstance::Initialize 0x101F2D664). (void*, void*) lambda shape matches; the Windows identity is inferred from the label. (_work/codeware/notes.md)",
+    "confidence": "medium"
+  },
+  {
+    "hash": "1559565515",
+    "name": "CommunitySystem_Update",
+    "offset": "1:0x14AD374",
+    "evidence": "Called by the \"CommunitySystem/Update\" job 0x1014AF748 with w1 = [system+0x109]; drains the community request queue +0x48 filled by the ICommunitySystem virtuals. void(ICommunitySystem*, bool) matches. (_work/codeware/re_res.md#10, re_quest.md#6)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3151104823",
+    "name": "EngineTime_Frequency",
+    "offset": "3:0x1C77408",
+    "evidence": "double 1e9 at 0x10900B408 written once by 0x10214C1F0 (clock_gettime) and read by the EngineTime natives FromFloat/ToFloat/ToDouble 0x10214C558/0x10214C5F0/0x10214C694. (_work/codeware/re_res.md#8)",
+    "confidence": "high"
+  },
+  {
+    "hash": "4248638169",
+    "name": "Entity_Attach",
+    "offset": "1:0xC99368",
+    "evidence": "DB has unverified 1:0x180C9D8; DB value 1:0x180C9D8 refuted. Status 3 -> 4, stores the scene from [x1] at +0xB8, calls vt+0x160/+0x178; called by the scene attach op 0x100CF5FCC (0x100CF608C) and 0x100CF475C/0x100CFABD8. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2263681375",
+    "name": "Entity_Detach",
+    "offset": "1:0xC996C0",
+    "evidence": "DB has unverified 1:0x15EDE88; DB value 1:0x15EDE88 refuted. Status 5 -> 2, detaches components in reverse order, calls vt+0x168; reached from the scene detach op 0x100CF61C0. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2515274237",
+    "name": "Entity_Dispose",
+    "offset": "1:0xC999E0",
+    "evidence": "DB has unverified 1:0xCF5E98; DB value 1:0xCF5E98 refuted. If status is 2..5 it detaches through the scene (0x100CFB73C) or uninitializes inline, then sets +0x15C |= 8; 34 callers including the EntitySpawnerToken destructor 0x100CE0D28. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3490519617",
+    "name": "Entity_Initialize",
+    "offset": "1:0xC985EC",
+    "evidence": "DB has unverified 1:0x3641A50; DB value 1:0x3641A50 refuted. Sets status +0x156 = 1, entityID +0x48 from request+0x20, request+0x40/0x48 -> +0xB8/+0xC0; job labels \"Entity/InitializeComponents\", \"Entity/OnInitialize\", \"Entity/GatherEventListeners\". (Entity*, JobQueue&, EntityInitializeRequest*) matches. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2182550867",
+    "name": "Entity_Assemble",
+    "offset": "1:0xC97E28",
+    "evidence": "DB has unverified 1:0xCCEDEC; DB value 1:0xCCEDEC refuted (entityAssembler.cpp code, x0 is not an entity). Called by the builder assemble step 0x100CA14B8 (\"EntityTemplate_Assemble\" job) at 0x100CA17E8 with the entity at builder+0xB0; writes templatePath +0x60 and appearanceName +0x50 and adds the components to entity+0x70. Returns void on macOS. (_work/codeware/re_entity.md#1)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3596356635",
+    "name": "Entity_Uninitialize",
+    "offset": "1:0xC992C4",
+    "evidence": "DB has unverified 1:0xCC45EC; DB value 1:0xCC45EC refuted. Status 6 -> 7, calls vt+0x158, clears +0xB0. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "525805301",
+    "name": "Entity_ResolveRecordID",
+    "offset": "1:0x378A7E8",
+    "evidence": "Returns the record ID of the first gameRecordIdSpawnModifier in the spawn parameter; used by the gamePuppet vt+0x148/+0x150 overrides (0x103778574, 0x10377865C). macOS: TweakDBID in x0, parameter in x1. (_work/codeware/re_entity.md#2)",
+    "confidence": "high"
+  },
+  {
+    "hash": "489494088",
+    "name": "EntityBuilder_ExtractComponentsJob",
+    "offset": "1:0xCA41E0",
+    "evidence": "DB has unverified 1:0xD4DC20; DB value 1:0xD4DC20 refuted (RuntimeSystemEntityTransforms code). Job handler stored by ScheduleExtractComponentsJob 0x100CA08A0 (\"EntityBuilder_ExtractComponents\"); (EntityBuilderJobParams*, RunContext&) matches; frees its params at exit (HookBefore only). (_work/codeware/re_entity.md#3)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3068279668",
+    "name": "EntitySpawner_SpawnEntity",
+    "offset": "1:0xCDD130",
+    "evidence": "Called by the verified EntitySpawner_SpawnFromTemplate 0x1014084B0 at 0x101408700 with x0 = spawner, x1 = &request, x8 = &token; 9 callers. macOS returns SharedPtr<EntitySpawnerToken> through x8. (_work/codeware/re_entity.md#8a)",
+    "confidence": "high"
+  },
+  {
+    "hash": "552341017",
+    "name": "EntitySpawnerToken_dtor",
+    "offset": "1:0xCE0D28",
+    "evidence": "Token destructor body (alias thunk 0x100CE0DD0 used by 78 call sites): disposes the entity if status 2..5, releases the entity handle +0x10 and the task +0x00, returns this. (_work/codeware/re_entity.md#8b)",
+    "confidence": "high"
+  },
+  {
+    "hash": "4792499",
+    "name": "InkLayer_RegisterListener",
+    "offset": "1:0x48DC344",
+    "evidence": "Locks inkLayer+0x130 and adds the listener to the container at +0xD0; only caller inkLayerProxy::RegisterListener 0x1048E5104. (inkLayer*, const Handle&) matches. (_work/codeware/re_ui.md#1)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2050958960",
+    "name": "InkLayer_AttachWidgetTree",
+    "offset": "1:0x48DB648",
+    "evidence": "Only caller is the inkLayer method 0x1048DAF04 that creates the layer proxy; walks the tree calling SetLayer 0x1049B18F0 and initializes the logic controllers (vt+0x110). Arguments match; returns void on macOS. (_work/codeware/re_ui.md#2)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2671382832",
+    "name": "InkLogicController_OnInitialize",
+    "offset": "1:0x47CF584",
+    "evidence": "inkWidgetLogicController C++ vtable 0x107359118 slot +0x110; fires the script event \"OnInitialize\". (_work/codeware/re_ui.md#3)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1159862457",
+    "name": "InkLogicController_OnUninitialize",
+    "offset": "1:0x47CF720",
+    "evidence": "Same vtable, slot +0x118; fires \"OnUninitialize\" and calls the base 0x1047CD05C. (_work/codeware/re_ui.md#3)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3589084925",
+    "name": "InkLogicController_OnArrangeChildrenComplete",
+    "offset": "1:0x47CF848",
+    "evidence": "Same vtable, slot +0x120; fires \"OnArrangeChildrenComplete\" unless InkSystem+0x209 is set. (_work/codeware/re_ui.md#3)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2635337807",
+    "name": "InkSystem_Instance",
+    "offset": "3:0x19C9830",
+    "evidence": "Global InkSystem* 0x108D5D830: set in InkSystem::Initialize 0x104882F7C at 0x104883064, cleared in the dtor 0x1048829CC at 0x1048829FC, returned by the getter 0x10488B8DC. (_work/codeware/notes.md, re_ui.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "4284882427",
+    "name": "InkSystem_ProcessCharacterEvent",
+    "offset": "1:0x4887524",
+    "evidence": "Only caller ProcessInputEvents (0x104884BDC); locks inputWidget +0x2E8, reads keyboardState +0x2F8, dispatches inkCharacterEvent. bool(InkSystem*, EInputKey, EInputAction) matches. (_work/codeware/re_ui.md#7)",
+    "confidence": "high"
+  },
+  {
+    "hash": "673454961",
+    "name": "InkSystem_ProcessInputEvents",
+    "offset": "1:0x48842E0",
+    "evidence": "Only caller is the InkSystem tick 0x1048841DC; returns early when layerManagers (+0x38C) is empty and calls ProcessCharacterEvent per input (stride 0x40). (InkSystem*, u64, RawInputBuffer&) matches. (_work/codeware/re_ui.md#7)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1667176558",
+    "name": "InkWidget_GetLayer",
+    "offset": "1:0x49ADE28",
+    "evidence": "Returns widget+0x148 or the first ancestor proxy (caching it in +0x148); 36 callers. macOS returns the Handle<inkLayerProxy> through x8. (_work/codeware/re_ui.md#4)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2516523266",
+    "name": "InkWidget_SetLayer",
+    "offset": "1:0x49B18F0",
+    "evidence": "Stores a strong copy of [x1] in widget+0x148 and updates the property manager; called by AttachWidgetTree 0x1048DB890. Matches. (_work/codeware/re_ui.md#4)",
+    "confidence": "high"
+  },
+  {
+    "hash": "492509908",
+    "name": "InkWidget_ScriptReparent",
+    "offset": "1:0x49B888C",
+    "evidence": "Native handler of inkWidget.Reparent: CClassFunction ctor at 0x1049A78D8 with x4 = 0x1049B888C in the inkWidget registration 0x1049A414C. Native handler signature matches. (_work/codeware/re_ui.md#5)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3558023194",
+    "name": "InkWidget_ScriptAddChild",
+    "offset": "1:0x49A3084",
+    "evidence": "Native handler of inkCompoundWidget.AddChild: CClassFunction ctor at 0x1049A08F4 with x4 = 0x1049A3084 in the inkCompoundWidget registration 0x1049A02EC. Native handler signature matches. (_work/codeware/re_ui.md#5)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3357288308",
+    "name": "InkWidget_TriggerEvent",
+    "offset": "1:0x492B550",
+    "evidence": "Generic TriggerEvent<IScriptable> instantiation on the widget event manager (widget+0x50), used by the inkMenusState.DispatchEvent native; bool(manager, CName, Handle by value) matches. All instantiations share the ABI; which one Windows used is not decidable from the macOS binary. (_work/codeware/re_ui.md#6)",
+    "confidence": "medium"
+  },
+  {
+    "hash": "3370191745",
+    "name": "IComponent_Toggle",
+    "offset": "1:0xCA633C",
+    "evidence": "Sets isEnabled +0x8B and calls vt+0x1E8 when attached; 128 callers; the script native \"Toggle\" inlines the same code. (IComponent*, bool) matches. 40 bytes with a b.eq at +8 (the RED4ext hook engine relocates it). (_work/codeware/re_entity.md#4)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1828854026",
+    "name": "IPlacedComponent_SetTransform",
+    "offset": "1:0xC417F0",
+    "evidence": "DB has unverified 1:0x1443324; DB value 1:0x1443324 refuted (libpng code). Target of Entity::SetWorldTransform 0x100C97A90 (`ldr x0,[x0,#0xb0]; b 0x100C417F0`); compares/copies the WorldTransform and notifies the owner. (IPlacedComponent*, const WorldTransform&) matches. (_work/codeware/re_entity.md#5)",
+    "confidence": "high"
+  },
+  {
+    "hash": "633871992",
+    "name": "MorphTargetManager_ApplyMorphTarget",
+    "offset": "1:0xC6C0C4",
+    "evidence": "DB has unverified 1:0x1C5226C; DB value 1:0x1C5226C refuted (render target validation). Updates the weight list at +0x98 and the meshes at +0xD8; 9 callers in CharacterCustomizationSystem pass (target x1, region x2, weight s0, w3). Matches. (_work/codeware/re_entity.md#6)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3491172781",
+    "name": "NodeRef_Create",
+    "offset": "1:0x33409EC",
+    "evidence": "8-byte wrapper `mov w2,#0; b 0x103340CF8` of the NodeRef parser used by the game's \"ParseNodeRef\" native; 36 callers. macOS: NodeRef(const char*, u32 length), hash in x0. Call only, never hook. (_work/codeware/re_res.md#7)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1944983789",
+    "name": "ObjectSerializer_Prepare",
+    "offset": "1:0x2161438",
+    "evidence": "17 callers build the params on the stack right before it (e.g. PersistencySystem 0x103FEBC84: flags 0x10000000, sizeLimit); the body reads flags +0, cooking +4, sizeLimit +8, +0xC..+0xE. Returns void on macOS. (_work/codeware/re_res.md#1)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2646156567",
+    "name": "ObjectSerializer_WriteToBuffer",
+    "offset": "1:0x11D6FA4",
+    "evidence": "Builds the serializer, calls Prepare (0x1011D700C), adds the root object and writes; DataBuffer returned through x8. Matches Codeware's by-value declaration. (_work/codeware/re_res.md#1)",
+    "confidence": "high"
+  },
+  {
+    "hash": "125247621",
+    "name": "ObjectSerializer_ReadFromStrean",
+    "offset": "1:0x11D6E58",
+    "evidence": "Paired with WriteToBuffer in the same system (callers 0x103A63840/0x103AB3008); reads the DataBuffer from the stream, loads the package and deserializes one object of the given class. macOS: Handle returned through x8, (BaseStream&, CClass*). (_work/codeware/re_res.md#1)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3442350580",
+    "name": "PersistentObject_InitializeState",
+    "offset": "1:0x1F8DFFC",
+    "evidence": "Called twice by the gameObject virtual 0x101F87A64 (object and components); reads the params system @0 (GetPersistentState vt+0x1B8), mergeStates @8, objectType @0x10, persistentId @0x18. Matches. (_work/codeware/re_res.md#6)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2394822845",
+    "name": "PhysicsTraceResult_GetHitObject",
+    "offset": "1:0x4092830",
+    "evidence": "Looks up the physics proxy of w0 and returns the user-data handle at index w1 through x8; 41 callers (pairs with index 0 and 1). Matches the by-value declaration. (_work/codeware/re_misc.md#8)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2050111212",
+    "name": "PlayerSystem_OnPlayerSpawned",
+    "offset": "1:0x3FD4D70",
+    "evidence": "cpPlayerSystem spawn completion: reached from the std::function closure 0x103FD788C of the player entity spawn; stores the spawned entity as the local main object (this+0x604C0) and invokes the request callback. 4 pointer args, result unused (HookAfter). No name string: identity from the flow. (_work/codeware/re_entity.md#7)",
+    "confidence": "medium"
+  },
+  {
+    "hash": "803085170",
+    "name": "PointOfInterestMappin_SetPhase",
+    "offset": "1:0x42EAF14",
+    "evidence": "gamemappinsPointOfInterestMappin vtable 0x1072DD040 slot +0x1D0; called from the queued MappinSystem request (type 5) 0x1042B85AC; bool(mappin, gamedataMappinPhase) matches. (_work/codeware/re_quest.md#4)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3227858325",
+    "name": "QuestPhaseInstance_ExecuteNode",
+    "offset": "1:0x2CFD644",
+    "evidence": "Called by the phase graph step 0x102CFCE70 (0x102CFD0C4) with (phase, node, ctx, socket, outSockets); returns the node result in w0. Matches. (_work/codeware/re_quest.md#2)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3144298192",
+    "name": "QuestsSystem_CreateContext",
+    "offset": "1:0x2EFA150",
+    "evidence": "Loads the QuestsSystem members used by the 18 inlined copies (e.g. vt+0x218) and tail-calls the QuestContext ctor 0x102CF2FF8 with x0 = x8. macOS: QuestContext constructed through x8, (system, i32, i8, i32, i32). Confidence medium-high (identity from the shape). (_work/codeware/re_quest.md#3)",
+    "confidence": "medium"
+  },
+  {
+    "hash": "2996308699",
+    "name": "RenderData_Release",
+    "offset": "1:0x16A38D4",
+    "evidence": "Ref-count release (`ldaddal -1` on +8, deleting dtor vt+0x8 at zero); 2528 callers; the MeshAppearance dtor releases MaterialData (+0x48) with it (0x100E1F648). void(RenderData*) matches. (_work/codeware/re_res.md#9)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2288918343",
+    "name": "ResourceBank_ForgetResource",
+    "offset": "1:0x21B4AB8",
+    "evidence": "Removes the path from the bank cache (+0x60 array, +0 map) and returns the cached handle; callers pass x0 = loader+0x48, x1 = path, x8 = &out (0x1021B84F4, 0x1021B8F08). macOS: Handle returned through x8. (_work/codeware/re_res.md#5)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2840271332",
+    "name": "RuntimeEntityRegistry_RegisterEntity",
+    "offset": "1:0xD13C5C",
+    "evidence": "Inserts entity+0x48 -> WeakHandle into the registry map +0x48 under lock +0x43 and notifies; called by gameObject::OnAttach 0x101F87D34 (0x101F87D78). (Registry*, Entity*) matches. (_work/codeware/re_entity.md#9a)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3878623943",
+    "name": "RuntimeEntityRegistry_UnregisterEntity",
+    "offset": "1:0xD14084",
+    "evidence": "Removes entity+0x48 from the same map and notifies; called by gameObject::OnDetach (0x101F87F80). (_work/codeware/re_entity.md#9b)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1576214475",
+    "name": "RuntimeSystemEntity_AttachEntity",
+    "offset": "1:0xD25E50",
+    "evidence": "8-byte thunk `ldr x0,[x0,#0x48]; b 0x100CF6EBC` that queues the attach op (op 1 -> Entity::Attach); called with the 0x40-byte attach request by the proxy entity 0x100CAC0B0. Call only, never hook. (_work/codeware/re_entity.md#10a)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1737563910",
+    "name": "RuntimeSystemEntity_DetachEntity",
+    "offset": "1:0xD25E58",
+    "evidence": "8-byte thunk `ldr x0,[x0,#0x48]; b 0x100CF6FD0` (detach op 2); 9 callers pass a const Handle<Entity>&. Call only, never hook. (_work/codeware/re_entity.md#10b)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1471948702",
+    "name": "RuntimeSystemWeather_GetEnvironmentDefinition",
+    "offset": "1:0xD5AEE0",
+    "evidence": "Returns the environment definition handle (*(env+0x150)) through x8; called by worldWeatherAreaNotifier 0x1045D97C4. macOS: Handle through x8. (_work/codeware/re_misc.md#6c)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2679119876",
+    "name": "RuntimeSystemWeather_GetWeatherState",
+    "offset": "1:0xD5AA60",
+    "evidence": "Picks the current state index and tail-calls GetStateByIndex 0x100D5BF98 with x8 passed through; caller questWeather_ConditionType 0x102C2A248. macOS: Handle through x8. (_work/codeware/re_misc.md#6d)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2334794340",
+    "name": "RuntimeSystemWeather_SetWeatherByName",
+    "offset": "1:0xD5C384",
+    "evidence": "bool(system, CName weather, CName source, float blend, u32, u32 priority) matches. (_work/codeware/re_misc.md#6a)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1821516328",
+    "name": "RuntimeSystemWeather_SetWeatherByIndex",
+    "offset": "1:0xD597A8",
+    "evidence": "Sets current/previous weather state (+0x90/+0x98/+0xB0/+0xA0/+0xB8); callers photo mode 0x10097AEF0 and the resets 0x100D5DEAC/0x100D5E004. macOS: fifth argument is an integer (w3) and the function returns void. (_work/codeware/re_misc.md#6b)",
+    "confidence": "high"
+  },
+  {
+    "hash": "3993832650",
+    "name": "ScriptBundle_dtor",
+    "offset": "1:0x21ECFD8",
+    "evidence": "Destructor body behind the 4-byte thunk 0x1021ED64C, whose callers are the script loader 0x10223A748 and 0x10223B05C; destroys the pthread mutex +0x138, the map +0x100 and the strings +0xF0 of the ScriptBundle built by ctor 0x1021ECDAC. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2070546748",
+    "name": "ScriptOpCodes_Register",
+    "offset": "1:0x2252EF4",
+    "evidence": "Fills the opcode handler table 0x10908B798 (the verified OpcodeHandlers) with 0x1021FD4B8(op, handler) for every opcode; only caller is the script runtime ctor 0x10223A3B8. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "4224523662",
+    "name": "ScriptValidator_CompareType",
+    "offset": "1:0x21FD144",
+    "evidence": "Reached by tail call from ValidateProperty for arrays; bool(IType* native, ScriptType* script): maps DynArray/StaticArray/Handle/WeakHandle/ScriptRef meta types and compares names otherwise. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "898639042",
+    "name": "ScriptValidator_Validate",
+    "offset": "1:0x21FBF90",
+    "evidence": "DB has unverified 1:0x3D96BF4; DB value 1:0x3D96BF4 refuted (no callers). Only caller is the script loader 0x10223A748 (\"Failed to load scripts\"); dispatches per definition type to 0x1021FC1A4/0x1021FC290/0x1021FC47C/0x1021FC61C/0x1021FCEE0 and reports \"Validation failed for %u type(s)\". bool(void*, ScriptBundle*, void*) matches. Also used by the RED4ext loader ValidateScripts hook. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "560604283",
+    "name": "ScriptValidator_ValidateProperty",
+    "offset": "1:0x21FCFB8",
+    "evidence": "Only caller is the class validator 0x1021FCCDC (x1 script property, x2 native property from GetProperty 0x102198B40); on false the caller reports \"Imported property '%hs.%hs' type '%hs' does not match\". bool(void*, ScriptProperty*, CProperty*) matches. (_work/codeware/notes.md)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1239092911",
+    "name": "TagSystem_AssignTag",
+    "offset": "1:0x20CDE7C",
+    "evidence": "Only caller AssignTags 0x1020CE300 loops (redTagSystem* x0, EntityID x1, CName x2); reached from gameObject::OnAttach with GameTagSystem+0x48. (_work/codeware/re_entity.md#11a)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1875775378",
+    "name": "TagSystem_UnassignTag",
+    "offset": "1:0x20CE358",
+    "evidence": "Only caller UnassignTags 0x1020CE764 (gameObject::OnDetach 0x101F87F64); same arguments. (_work/codeware/re_entity.md#11b)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1159928678",
+    "name": "VehicleGarageComponent_LoadSummonSetup",
+    "offset": "1:0x124FE1C",
+    "evidence": "Reads the summon setup flats (\".simpleSpawn\", \".despawnDistance\", ...) of the record at this+0x328; called by vehicleGarageComponent::OnAttach (0x101250C64). void(component) matches. (_work/codeware/re_misc.md#2)",
+    "confidence": "high"
+  },
+  {
+    "hash": "1883248814",
+    "name": "VehicleController_ToggleAuxLights",
+    "offset": "1:0x12E6F44",
+    "evidence": "Common light toggle sink called by the script ToggleLights 0x1012E6E28 (tail call and BL) and by 0x1012E6044; enables/disables the light component (ctrl+0x98) by mask. (ctrl, bool, ELightType) matches. Confidence medium-high. (_work/codeware/re_misc.md#1)",
+    "confidence": "medium"
+  },
+  {
+    "hash": "3027836941",
+    "name": "VehicleSystem_ToggleGarageVehicle",
+    "offset": "1:0x1369A5C",
+    "evidence": "gameVehicleSystem vt+0x2A0; bool(system, const GarageVehicleID&, bool) matches. (_work/codeware/re_misc.md#3)",
+    "confidence": "high"
+  },
+  {
+    "hash": "2912168594",
+    "name": "VisualController_LoadDependencies",
+    "offset": "1:0xC8B630",
+    "evidence": "Called by the \"VisualControllerComponent_ScheduleDependencyStreaming\" job 0x100C8DB68 with (ctrl, priority, x8 = &JobHandle); loads the dependency meshes. macOS: JobHandle returned through x8. (_work/codeware/re_misc.md#9)",
+    "confidence": "high"
+  }
+]

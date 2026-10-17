@@ -1,4 +1,5 @@
 #include "WorldStateSystem.hpp"
+#include "App/MacOSUnavailable.hpp"
 #include "App/World/CommunityWrapper.hpp"
 #include "Core/Facades/Container.hpp"
 #include "Red/CommunitySystem.hpp"
@@ -29,6 +30,12 @@ bool App::WorldStateSystem::IsReady() const
 
 Red::Handle<Red::worldStreamingWorld> App::WorldStateSystem::GetStreamingWorld()
 {
+#if defined(__APPLE__)
+    // macOS: the runtime system's streaming world handle offset (+0x270) is not verified on macOS.
+    static std::once_flag s_reported;
+    ReportUnavailableOnMacOS(s_reported, "WorldStateSystem.GetStreamingWorld");
+    return {};
+#endif
     auto streamingSystem = Red::GetRuntimeSystem<Red::worldRuntimeSystemWorldStreaming>();
     return Raw::RuntimeSystemWorldStreaming::StreamingWorld::Ref(streamingSystem);
 }

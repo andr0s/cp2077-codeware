@@ -1,5 +1,5 @@
 #include "CommunityWrapper.hpp"
-#include "Core/Facades/Log.hpp"
+#include "App/MacOSUnavailable.hpp"
 
 App::CommunityEntryWrapper::CommunityEntryWrapper(Red::SharedPtr<Red::Community> aCommunity,
                                                   Red::CommunityEntry* aEntry)
@@ -41,9 +41,7 @@ Red::DynArray<Red::EntityID> App::CommunityEntryWrapper::GetRestoredEntityIDs() 
     // macOS: CommunityEntrySpawner+0x18 holds 0x28-byte restore records (destructor 0x101497DB4), not entity IDs, and
     // where the ID sits in a record is not verified.
     static std::once_flag s_reported;
-    std::call_once(s_reported, [] {
-        Core::Log::Warning("[macOS] CommunityEntryWrapper.GetRestoredEntityIDs is not available on macOS.");
-    });
+    ReportUnavailableOnMacOS(s_reported, "CommunityEntryWrapper.GetRestoredEntityIDs");
     return {};
 #else
     return entry->spawner->restoredEntityIDs;

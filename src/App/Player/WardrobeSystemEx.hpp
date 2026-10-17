@@ -1,5 +1,6 @@
 #pragma once
 
+#include "App/MacOSUnavailable.hpp"
 #include "Red/TweakDB.hpp"
 #include "Red/WardrobeSystem.hpp"
 
@@ -9,6 +10,12 @@ struct WardrobeSystemEx : Red::WardrobeSystem
 {
     bool ForgetItemID(const Red::ItemID& aItemID)
     {
+#if defined(__APPLE__)
+        // macOS: the wardrobe item store offsets (+0x48, lock +0xF4) are not verified on macOS.
+        static std::once_flag s_reported;
+        ReportUnavailableOnMacOS(s_reported, "WardrobeSystem.ForgetItemID");
+        return false;
+#endif
         auto& store = Raw::WardrobeSystem::ItemStore::Ref(this);
         auto& mutex = Raw::WardrobeSystem::ItemStoreMutex::Ref(this);
         auto key = Red::GetFlatValue<Red::CName>({aItemID.tdbid, ".appearanceName"});
