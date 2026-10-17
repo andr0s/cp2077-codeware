@@ -1,5 +1,6 @@
 #include "StaticEntitySystem.hpp"
 #include "Red/Entity.hpp"
+#include "Red/GameSystemsMacOS.hpp"
 #include "Red/RuntimeScene.hpp"
 
 void App::StaticEntitySystem::OnWorldAttached(Red::world::RuntimeScene*)
@@ -116,7 +117,11 @@ Red::EntityID App::StaticEntitySystem::SpawnEntity(const StaticEntitySpecPtr& aE
         return {};
 
     Red::EntityID entityID{};
+#if defined(__APPLE__)
+    entityID = Raw::DynamicEntityIDSystem::GetNextTransientID(m_entityIDSystem);
+#else
     m_entityIDSystem->GetNextTransientID(entityID);
+#endif
 
     if (!entityID.IsDefined())
         return {};

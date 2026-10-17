@@ -1,4 +1,5 @@
 #include "DynamicEntitySystem.hpp"
+#include "Red/GameSystemsMacOS.hpp"
 #include "Red/RuntimeScene.hpp"
 #include "Red/TagSystem.hpp"
 #include "Red/TweakDB.hpp"
@@ -29,7 +30,12 @@ void App::DynamicEntitySystem::OnStreamingWorldLoaded(Red::worldRuntimeScene*, u
     m_spawnEventListenerID = m_spawnEventBroadcaster->RegisterListener(
         {this, &DynamicEntitySystem::OnEntitySpawnerEvent}, "");
 
+#if defined(__APPLE__)
+    static_cast<Red::Handle<Red::PersistentState>&>(m_persistentState) = Raw::PersistencySystem::GetPersistentState(
+        m_persistencySystem, SystemPersistentID, m_persistentStateType, true);
+#else
     m_persistencySystem->GetPersistentState(m_persistentState, SystemPersistentID, m_persistentStateType, true);
+#endif
     m_persistentState->RestoreAfterLoading();
 
     for (const auto& entityState : m_persistentState->GetEntityStates())
@@ -242,7 +248,12 @@ bool App::DynamicEntitySystem::SpawnFromEntityState(const App::DynamicEntityStat
                                          aEntityState->entitySpec->orientation,
                                          aEntityState->entitySpec->recordID};
 
+#if defined(__APPLE__)
+    token = Raw::EntityStubSystem::CreateStub(
+        m_entityStubSystem, request, [this, aEntityState](Red::EntityStubTokenPtr& aToken) {
+#else
     m_entityStubSystem->CreateStub(token, request, [this, aEntityState](Red::EntityStubTokenPtr& aToken) {
+#endif
         if (aToken->status != Red::EntityStubStatus::Created)
         {
             RemoveEntityState(aEntityState);
@@ -287,11 +298,19 @@ App::DynamicEntityStatePtr App::DynamicEntitySystem::CreateEntityState(const App
 
     if (aEntitySpec->persistState)
     {
+#if defined(__APPLE__)
+        entityID = Raw::DynamicEntityIDSystem::GetNextPersistableID(m_entityIDSystem);
+#else
         m_entityIDSystem->GetNextPersistableID(entityID);
+#endif
     }
     else
     {
+#if defined(__APPLE__)
+        entityID = Raw::DynamicEntityIDSystem::GetNextTransientID(m_entityIDSystem);
+#else
         m_entityIDSystem->GetNextTransientID(entityID);
+#endif
     }
 
     if (!entityID.IsDefined())
@@ -321,7 +340,11 @@ void App::DynamicEntitySystem::RestoreEntityState(const App::DynamicEntityStateP
     if (!aEntityState->entitySpec->persistState)
     {
         m_persistencySystem->RemoveDynamicEntityState(aEntityState->entityID);
+#if defined(__APPLE__)
+        aEntityState->entityID = Raw::DynamicEntityIDSystem::GetNextTransientID(m_entityIDSystem);
+#else
         m_entityIDSystem->GetNextTransientID(aEntityState->entityID);
+#endif
     }
 
     AddEntityState(aEntityState);
@@ -412,10 +435,14 @@ Red::Handle<Red::Entity> App::DynamicEntitySystem::GetEntity(Red::EntityID aEnti
     if (!m_ready)
         return {};
 
+#if defined(__APPLE__)
+    return Raw::PopulationSystem::FindEntity(m_populationSystem, aEntityID);
+#else
     Red::Handle<Red::Entity> entity;
     m_populationSystem->FindEntity(entity, aEntityID);
 
     return entity;
+#endif
 }
 
 Red::DynArray<Red::CName> App::DynamicEntitySystem::GetTags(Red::EntityID aEntityID)
@@ -563,7 +590,11 @@ Red::DynArray<Red::Handle<Red::Entity>> App::DynamicEntitySystem::GetTagged(Red:
     {
         for (const auto& entityID : taggedIt.value())
         {
+#if defined(__APPLE__)
+            entity = Raw::PopulationSystem::FindEntity(m_populationSystem, entityID);
+#else
             m_populationSystem->FindEntity(entity, entityID);
+#endif
 
             if (entity)
             {

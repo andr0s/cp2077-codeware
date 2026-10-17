@@ -3,8 +3,41 @@
 #include "Core/Memory/AddressResolver.hpp"
 #include "Core/Platform.hpp"
 
+#if !(defined(_WIN32) || defined(_WIN64))
+#include <atomic>
+#endif
+
 namespace Core
 {
+#if !(defined(_WIN32) || defined(_WIN64))
+namespace Detail
+{
+void ReportUnavailableFunction(const char* aSignature);
+
+// macOS: addresses that are not available on this platform resolve to 0. Calls through such a RawFunc land here
+// instead of jumping to null: the first call is logged and a default value is returned.
+template<typename R, typename... Args>
+R UnavailableFunction(Args...)
+{
+    static std::atomic_flag s_reported;
+    if (!s_reported.test_and_set())
+    {
+        ReportUnavailableFunction(__PRETTY_FUNCTION__);
+    }
+
+    if constexpr (std::is_reference_v<R>)
+    {
+        static std::remove_reference_t<R> s_default{};
+        return s_default;
+    }
+    else if constexpr (!std::is_void_v<R>)
+    {
+        return R{};
+    }
+}
+}
+#endif
+
 class RawBase
 {
 public:
@@ -42,12 +75,12 @@ public:
 
     [[nodiscard]] inline operator Callable() const
     {
-        return GetPtr();
+        return ToCallable(GetAddress());
     }
 
     [[nodiscard]] inline Callable operator~() const
     {
-        return GetOriginalPtr();
+        return ToCallable(GetOriginalAddress());
     }
 
     [[nodiscard]] inline Callable GetPtr() const noexcept
@@ -108,15 +141,24 @@ public:
 
     inline static auto Invoke(Args... aArgs)
     {
-        return reinterpret_cast<Callable>(GetAddress())(std::forward<Args>(aArgs)...);
+        return ToCallable(GetAddress())(std::forward<Args>(aArgs)...);
     }
 
     inline static auto InvokeOriginal(Args... aArgs)
     {
-        return reinterpret_cast<Callable>(GetOriginalAddress())(std::forward<Args>(aArgs)...);
+        return ToCallable(GetOriginalAddress())(std::forward<Args>(aArgs)...);
     }
 
 private:
+    inline static Callable ToCallable(uintptr_t aAddress) noexcept
+    {
+#if !(defined(_WIN32) || defined(_WIN64))
+        if (!aAddress)
+            return &Detail::UnavailableFunction<R, Args...>;
+#endif
+        return reinterpret_cast<Callable>(aAddress);
+    }
+
     inline static uintptr_t address = 0;
     inline static uintptr_t original = 0;
 };

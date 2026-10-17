@@ -2,6 +2,7 @@
 #include "Core/Facades/Container.hpp"
 #include "Core/Facades/Log.hpp"
 #include "Red/CommunitySystem.hpp"
+#include "Red/GameSystemsMacOS.hpp"
 #include "Red/JournalManager.hpp"
 #include "Red/MappinSystem.hpp"
 #include "Red/NodeRef.hpp"
@@ -247,8 +248,12 @@ App::OpenWorldActivityResult App::OpenWorldSystem::ProcessActivity(
 
     for (const auto& entityID : entityIDs)
     {
+#if defined(__APPLE__)
+        auto entity = Raw::PopulationSystem::FindEntity(m_populationSystem, entityID);
+#else
         Red::Handle<Red::Entity> entity;
         m_populationSystem->FindEntity(entity, entityID);
+#endif
 
         if (entity)
             return OpenWorldActivityResult::StillSpawned;
