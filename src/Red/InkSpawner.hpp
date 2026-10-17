@@ -46,7 +46,11 @@ namespace Raw::InkSpawner
 {
 constexpr auto FinishAsyncSpawn = Core::RawFunc<
     /* addr = */ Red::AddressLib::InkSpawner_FinishAsyncSpawn,
+#if defined(__APPLE__)
+    /* type = */ void (*)( // macOS: returns void
+#else
     /* type = */ bool (*)(
+#endif
         Red::InkSpawningContext& aContext,
         Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance)>();
 }

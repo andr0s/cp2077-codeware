@@ -28,6 +28,73 @@ void App::WidgetSpawningService::OnShutdown()
     Unhook<Raw::InkSpawner::FinishAsyncSpawn>();
 }
 
+#if defined(__APPLE__)
+Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnLocal(
+    Red::ink::WidgetLibraryResource& aLibrary, Red::CName aItemName)
+{
+    auto instance = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aItemName);
+
+    if (!instance)
+    {
+        auto* itemNameStr = aItemName.ToString();
+        auto* controllerSep = strchr(itemNameStr, ControllerSeparator);
+
+        if (controllerSep)
+        {
+            aItemName = Red::CName(itemNameStr, controllerSep - itemNameStr);
+            instance = Raw::InkWidgetLibrary::SpawnFromLocal(aLibrary, aItemName);
+
+            if (instance)
+            {
+                InjectController(instance, controllerSep + 1);
+            }
+        }
+    }
+
+    if (s_widgetSpawnEventEnabled && instance)
+    {
+        CallbackSystem::Get()->DispatchNativeEvent<inkWidgetSpawnEvent>(WidgetSpawnEventName, aLibrary.path, aItemName,
+                                                                        instance);
+    }
+
+    return instance;
+}
+
+Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnExternal(
+    Red::ink::WidgetLibraryResource& aLibrary, Red::ResourcePath aExternalPath, Red::CName aItemName)
+{
+    InjectDependency(aLibrary, aExternalPath);
+
+    return Raw::InkWidgetLibrary::SpawnFromExternal(aLibrary, aExternalPath, aItemName);
+}
+
+bool App::WidgetSpawningService::OnAsyncSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
+                                                   Red::InkSpawningInfo& aSpawningInfo,
+                                                   Red::CName aItemName,
+                                                   bool a4)
+{
+    auto* itemNameStr = aItemName.ToString();
+    auto* controllerSep = strchr(itemNameStr, ControllerSeparator);
+
+    if (controllerSep)
+    {
+        aItemName = Red::CName(itemNameStr, controllerSep - itemNameStr);
+    }
+
+    return Raw::InkWidgetLibrary::AsyncSpawnFromLocal(aLibrary, aSpawningInfo, aItemName, a4);
+}
+
+bool App::WidgetSpawningService::OnAsyncSpawnExternal(Red::ink::WidgetLibraryResource& aLibrary,
+                                                      Red::InkSpawningInfo& aSpawningInfo,
+                                                      Red::ResourcePath aExternalPath,
+                                                      Red::CName aItemName,
+                                                      bool a5)
+{
+    InjectDependency(aLibrary, aExternalPath);
+
+    return Raw::InkWidgetLibrary::AsyncSpawnFromExternal(aLibrary, aSpawningInfo, aExternalPath, aItemName, a5);
+}
+#else
 uintptr_t App::WidgetSpawningService::OnSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
                                                    Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
                                                    Red::CName aItemName)
@@ -94,6 +161,7 @@ bool App::WidgetSpawningService::OnAsyncSpawnExternal(Red::ink::WidgetLibraryRes
 
     return Raw::InkWidgetLibrary::AsyncSpawnFromExternal(aLibrary, aSpawningInfo, aExternalPath, aItemName);
 }
+#endif
 
 void App::WidgetSpawningService::OnFinishAsyncSpawn(Red::InkSpawningContext& aContext,
                                                     Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance)

@@ -56,10 +56,18 @@ App::CallbackSystem::~CallbackSystem()
 
 void App::CallbackSystem::OnWorldAttached(Red::world::RuntimeScene*)
 {
+#if defined(__APPLE__)
+    if (auto inkSystem = Red::InkSystem::Get())
+    {
+        auto& handler = inkSystem->GetSystemRequestsHandler();
+        Red::CallVirtual(handler.instance, "IsPreGame", m_pregame);
+    }
+#else
     {
         auto& handler = Red::InkSystem::Get()->GetSystemRequestsHandler();
         Red::CallVirtual(handler.instance, "IsPreGame", m_pregame);
     }
+#endif
 
     DispatchNativeEvent<GameSessionEvent>(SessionBeforeStartEventName, m_pregame, m_restored);
 }

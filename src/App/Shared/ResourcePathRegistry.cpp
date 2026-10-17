@@ -9,7 +9,14 @@ constexpr auto SharedName = Red::CName("ResourcePathRegistryV3" BUILD_SUFFIX);
 
 App::ResourcePathRegistry::ResourcePathRegistry(const std::filesystem::path& aPreloadPath)
 {
+#if defined(__APPLE__)
+    // macOS: keep the registry local instead of sharing it through the RTTI system at plugin load (as the ArchiveXL
+    // macOS port does). Each plugin then keeps its own map and its own ResourcePath::Create hook.
+    static SharedInstance s_localInstance;
+    s_instance = &s_localInstance;
+#else
     s_instance = Red::AcquireSharedInstance<SharedName, SharedInstance>();
+#endif
     s_preloadPath = aPreloadPath;
 }
 
@@ -44,6 +51,16 @@ void App::ResourcePathRegistry::OnBootstrap()
     }
 }
 
+#if defined(__APPLE__)
+void App::ResourcePathRegistry::OnCreatePath(uint64_t& aHash, const char* aPathStr, uint32_t aLength)
+{
+    if (aPathStr && aLength)
+    {
+        std::scoped_lock _(s_instance->m_lock);
+        s_instance->m_map[Red::ResourcePath(aHash)] = {aPathStr, aLength};
+    }
+}
+#else
 void App::ResourcePathRegistry::OnCreatePath(Red::ResourcePath* aPath, Red::StringView* aPathStr)
 {
     if (aPathStr && *aPathStr)
@@ -52,6 +69,7 @@ void App::ResourcePathRegistry::OnCreatePath(Red::ResourcePath* aPath, Red::Stri
         s_instance->m_map[*aPath] = {aPathStr->Data(), aPathStr->Length()};
     }
 }
+#endif
 
 std::string App::ResourcePathRegistry::ResolvePath(Red::ResourcePath aPath)
 {

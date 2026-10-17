@@ -2,6 +2,11 @@
 
 Red::InkSystem* Red::InkSystem::Get()
 {
+#if defined(__APPLE__)
+    // macOS: the instance pointer's address may be unresolved (0); report no ink system instead of dereferencing it.
+    if (!Raw::inkSystem::Instance)
+        return nullptr;
+#endif
     return Raw::inkSystem::Instance;
 }
 

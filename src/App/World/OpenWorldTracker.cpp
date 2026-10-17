@@ -3,7 +3,12 @@
 
 void App::OpenWorldTracker::OnBootstrap()
 {
+#if defined(__APPLE__)
+    if (!HookBefore<Raw::PointOfInterestMappin::SetPhase>(&OnSetPoiMappinPhase))
+        LogWarning("[macOS] Open world activity tracking (point of interest phases) is not available on macOS.");
+#else
     HookBefore<Raw::PointOfInterestMappin::SetPhase>(&OnSetPoiMappinPhase);
+#endif
 }
 
 void App::OpenWorldTracker::OnSetPoiMappinPhase(void* aMappin, Red::gamedataMappinPhase aMappinPhase)

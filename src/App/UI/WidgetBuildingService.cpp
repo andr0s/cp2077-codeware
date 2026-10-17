@@ -2,9 +2,18 @@
 
 void App::WidgetBuildingService::OnBootstrap()
 {
+#if defined(__APPLE__)
+    if (!HookAfter<Raw::inkWidget::ScriptReparent>(&AfterReparentFromScript))
+        LogWarning("[macOS] Attaching reparented widgets to their layer is not available on macOS.");
+    if (!HookAfter<Raw::inkCompoundWidget::ScriptAddChild>(&AfterAddChildFromScript))
+        LogWarning("[macOS] Attaching added child widgets to their layer is not available on macOS.");
+    if (!Hook<Raw::inkLogicController::OnInitialize>(&OnInitializeController))
+        LogWarning("[macOS] Logic controller initialization for script-built widgets is not available on macOS.");
+#else
     HookAfter<Raw::inkWidget::ScriptReparent>(&AfterReparentFromScript).OrThrow();
     HookAfter<Raw::inkCompoundWidget::ScriptAddChild>(&AfterAddChildFromScript).OrThrow();
     Hook<Raw::inkLogicController::OnInitialize>(&OnInitializeController).OrThrow();
+#endif
 }
 
 void App::WidgetBuildingService::OnShutdown()

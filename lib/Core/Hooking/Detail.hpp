@@ -5,6 +5,13 @@
 
 namespace Core
 {
+#if !(defined(_WIN32) || defined(_WIN64))
+namespace Detail
+{
+void ReportFailedHook(const std::string& aMessage);
+}
+#endif
+
 enum class HookFlow
 {
     Original,
@@ -41,6 +48,23 @@ struct HookResult
     {
         if (!success)
         {
+#if !(defined(_WIN32) || defined(_WIN64))
+            // macOS: an exception here would escape the plugin's Main and terminate the game. A hook target that is not
+            // available on this platform only disables the feature that needs it, so log the failure and continue.
+            if (aMessage)
+            {
+                Detail::ReportFailedHook(aMessage);
+            }
+            else if constexpr (sizeof(TOffset) == sizeof(uintptr_t))
+            {
+                Detail::ReportFailedHook(std::format("Failed to hook at address {:#X}.", TOffset));
+            }
+            else
+            {
+                Detail::ReportFailedHook(std::format("Failed to hook address id {}.", TOffset));
+            }
+            return;
+#endif
             if (aMessage)
             {
                 throw std::runtime_error(aMessage);

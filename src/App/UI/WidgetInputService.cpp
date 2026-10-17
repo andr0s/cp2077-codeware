@@ -13,7 +13,12 @@ constexpr auto RawInputEventName = Red::CName("OnInputKey");
 
 void App::WidgetInputService::OnBootstrap()
 {
+#if defined(__APPLE__)
+    if (!HookBefore<Raw::inkSystem::ProcessCharacterEvent>(&OnCharacterInput))
+        LogWarning("[macOS] Widget key input events (inkKeyInputEvent) are not available on macOS.");
+#else
     HookBefore<Raw::inkSystem::ProcessCharacterEvent>(&OnCharacterInput).OrThrow();
+#endif
 }
 
 void App::WidgetInputService::OnShutdown()
