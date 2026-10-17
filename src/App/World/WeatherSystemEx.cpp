@@ -26,8 +26,13 @@ bool App::WeatherSystemEx::ResetWeather(Red::Optional<bool> aForceRestore, Red::
 
     if (aForceRestore)
     {
+#if defined(__APPLE__)
+        // macOS: SetWeatherByIndex returns void; with index 0 it always applies the state.
+        Raw::RuntimeSystemWeather::SetWeatherByIndex(system, 0, "", aBlendTime, 0, 0);
+#else
         if (!Raw::RuntimeSystemWeather::SetWeatherByIndex(system, 0, "", aBlendTime, 0.0, 0))
             return false;
+#endif
     }
 
     return true;
@@ -40,10 +45,14 @@ Red::Handle<Red::worldEnvironmentDefinition> App::WeatherSystemEx::GetEnvironmen
     if (!system)
         return {};
 
+#if defined(__APPLE__)
+    return Raw::RuntimeSystemWeather::GetEnvironmentDefinition(system);
+#else
     Red::Handle<Red::worldEnvironmentDefinition> definition;
     Raw::RuntimeSystemWeather::GetEnvironmentDefinition(system, definition);
 
     return definition;
+#endif
 }
 
 Red::Handle<Red::worldWeatherState> App::WeatherSystemEx::GetWeatherState()
@@ -53,8 +62,12 @@ Red::Handle<Red::worldWeatherState> App::WeatherSystemEx::GetWeatherState()
     if (!system)
         return {};
 
+#if defined(__APPLE__)
+    return Raw::RuntimeSystemWeather::GetWeatherState(system);
+#else
     Red::Handle<Red::worldWeatherState> state;
     Raw::RuntimeSystemWeather::GetWeatherState(system, state);
 
     return state;
+#endif
 }

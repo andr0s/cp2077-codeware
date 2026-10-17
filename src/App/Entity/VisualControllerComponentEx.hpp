@@ -44,8 +44,12 @@ struct VisualControllerComponentEx : Red::entVisualControllerComponent
 
         if (update)
         {
+#if defined(__APPLE__)
+            auto jobHandle = Raw::VisualController::LoadDependencies(controller, 0);
+#else
             Red::JobHandle jobHandle;
             Raw::VisualController::LoadDependencies(controller, jobHandle, 0);
+#endif
 
             if (aWait)
             {

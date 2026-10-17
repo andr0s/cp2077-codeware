@@ -99,7 +99,7 @@ constexpr uint32_t ObjectSerializer_ReadFromStrean = 125247621;
 
 constexpr uint32_t PersistentObject_InitializeState = 3442350580;
 
-constexpr uint32_t PhysicsTraceResult_GetHitObject = RED_ADDRESS_MACOS_UNAVAILABLE(2394822845);
+constexpr uint32_t PhysicsTraceResult_GetHitObject = 2394822845;
 
 constexpr uint32_t PlayerSystem_OnPlayerSpawned = 2050111212; // cp::PlayerSystem::OnPlayerMainObjectSpawned
 
@@ -140,10 +140,10 @@ constexpr uint32_t RuntimeScene_DetachEntity = RED_ADDRESS_MACOS_UNAVAILABLE(173
 constexpr uint32_t RuntimeSystemEntity_AttachEntity = 1576214475;
 constexpr uint32_t RuntimeSystemEntity_DetachEntity = 1737563910;
 
-constexpr uint32_t RuntimeSystemWeather_GetEnvironmentDefinition = RED_ADDRESS_MACOS_UNAVAILABLE(1471948702);
-constexpr uint32_t RuntimeSystemWeather_GetWeatherState = RED_ADDRESS_MACOS_UNAVAILABLE(2679119876);
-constexpr uint32_t RuntimeSystemWeather_SetWeatherByName = RED_ADDRESS_MACOS_UNAVAILABLE(2334794340);
-constexpr uint32_t RuntimeSystemWeather_SetWeatherByIndex = RED_ADDRESS_MACOS_UNAVAILABLE(1821516328);
+constexpr uint32_t RuntimeSystemWeather_GetEnvironmentDefinition = 1471948702;
+constexpr uint32_t RuntimeSystemWeather_GetWeatherState = 2679119876;
+constexpr uint32_t RuntimeSystemWeather_SetWeatherByName = 2334794340;
+constexpr uint32_t RuntimeSystemWeather_SetWeatherByIndex = 1821516328;
 
 constexpr uint32_t ScriptBundle_dtor = 3993832650;
 
@@ -162,15 +162,15 @@ constexpr uint32_t SoundBankManager_ReadSoundBanksJson = RED_ADDRESS_MACOS_UNAVA
 constexpr uint32_t TagSystem_AssignTag = 1239092911;
 constexpr uint32_t TagSystem_UnassignTag = 1875775378;
 
-constexpr uint32_t VehicleGarageComponent_LoadSummonSetup = RED_ADDRESS_MACOS_UNAVAILABLE(1159928678);
+constexpr uint32_t VehicleGarageComponent_LoadSummonSetup = 1159928678;
 
-constexpr uint32_t VehicleController_ToggleAuxLights = RED_ADDRESS_MACOS_UNAVAILABLE(1883248814);
+constexpr uint32_t VehicleController_ToggleAuxLights = 1883248814;
 
-constexpr uint32_t VehicleSystem_ToggleGarageVehicle = RED_ADDRESS_MACOS_UNAVAILABLE(3027836941);
+constexpr uint32_t VehicleSystem_ToggleGarageVehicle = 3027836941;
 
 constexpr uint32_t VisionModeSystem_SetBraindanceMode = RED_ADDRESS_MACOS_UNAVAILABLE(1070077985);
 
-constexpr uint32_t VisualController_LoadDependencies = RED_ADDRESS_MACOS_UNAVAILABLE(2912168594);
+constexpr uint32_t VisualController_LoadDependencies = 2912168594;
 
 constexpr uint32_t WorkspotSystem_GetWorkspotInstance = RED_ADDRESS_MACOS_UNAVAILABLE(2234523611);
 }

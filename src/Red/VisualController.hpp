@@ -33,9 +33,16 @@ RED4EXT_ASSERT_OFFSET(VisualController, lock, 0x7C);
 
 namespace Raw::VisualController
 {
+#if defined(__APPLE__)
+// macOS: the job handle is returned through x8 (0x100C8B630).
+constexpr auto LoadDependencies = Core::RawFunc<
+    /* addr = */ Red::AddressLib::VisualController_LoadDependencies,
+    /* type = */ Red::JobHandle (*)(Red::VisualController* aController, uint8_t a3)>();
+#else
 constexpr auto LoadDependencies = Core::RawFunc<
     /* addr = */ Red::AddressLib::VisualController_LoadDependencies,
     /* type = */ uintptr_t (*)(Red::VisualController* aController, Red::JobHandle& aOut, uint8_t a3)>();
+#endif
 }
 
 namespace Raw::VisualControllerComponent

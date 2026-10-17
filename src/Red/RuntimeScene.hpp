@@ -66,11 +66,29 @@ constexpr auto SetWeatherByName = Core::RawFunc<
     /* type = */ bool (*)(Red::worldRuntimeSystemWeather* aSystem, Red::CName aWeather, Red::CName aSource,
                           float aBlendTime, uint32_t a5, uint32_t aPriority)>();
 
+#if defined(__APPLE__)
+// macOS: the fifth argument is an integer (w3) and the function returns void (0x100D597A8).
+constexpr auto SetWeatherByIndex = Core::RawFunc<
+    /* addr = */ Red::AddressLib::RuntimeSystemWeather_SetWeatherByIndex,
+    /* type = */ void (*)(Red::worldRuntimeSystemWeather* aSystem, uint32_t aIndex, Red::CName aSource,
+                          float aBlendTime, uint32_t a5, uint32_t aPriority)>();
+#else
 constexpr auto SetWeatherByIndex = Core::RawFunc<
     /* addr = */ Red::AddressLib::RuntimeSystemWeather_SetWeatherByIndex,
     /* type = */ bool (*)(Red::worldRuntimeSystemWeather* aSystem, uint32_t aIndex, Red::CName aSource,
                           float aBlendTime, float a5, uint32_t aPriority)>();
+#endif
 
+#if defined(__APPLE__)
+// macOS: both return the handle through x8 (0x100D5AEE0, 0x100D5AA60).
+constexpr auto GetEnvironmentDefinition = Core::RawFunc<
+    /* addr = */ Red::AddressLib::RuntimeSystemWeather_GetEnvironmentDefinition,
+    /* type = */ Red::Handle<Red::worldEnvironmentDefinition> (*)(Red::worldRuntimeSystemWeather* aSystem)>();
+
+constexpr auto GetWeatherState = Core::RawFunc<
+    /* addr = */ Red::AddressLib::RuntimeSystemWeather_GetWeatherState,
+    /* type = */ Red::Handle<Red::worldWeatherState> (*)(Red::worldRuntimeSystemWeather* aSystem)>();
+#else
 constexpr auto GetEnvironmentDefinition = Core::RawFunc<
     /* addr = */ Red::AddressLib::RuntimeSystemWeather_GetEnvironmentDefinition,
     /* type = */ void* (*)(Red::worldRuntimeSystemWeather* aSystem, Red::Handle<Red::worldEnvironmentDefinition>& aOut)>();
@@ -78,6 +96,7 @@ constexpr auto GetEnvironmentDefinition = Core::RawFunc<
 constexpr auto GetWeatherState = Core::RawFunc<
     /* addr = */ Red::AddressLib::RuntimeSystemWeather_GetWeatherState,
     /* type = */ void* (*)(Red::worldRuntimeSystemWeather* aSystem, Red::Handle<Red::worldWeatherState>& aOut)>();
+#endif
 }
 
 namespace Raw::RuntimeEntityRegistry
