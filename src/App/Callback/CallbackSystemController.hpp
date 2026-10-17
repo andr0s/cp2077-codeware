@@ -1,8 +1,15 @@
 #pragma once
 
+#if defined(__APPLE__)
+#include "Core/Logging/LoggingAgent.hpp"
+#endif
+
 namespace App
 {
 class CallbackSystemController
+#if defined(__APPLE__)
+    : public Core::LoggingAgent
+#endif
 {
 public:
     virtual Core::Map<Red::CName, Red::CName> GetEvents() = 0;

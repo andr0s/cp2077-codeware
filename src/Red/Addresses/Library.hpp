@@ -31,13 +31,13 @@ constexpr uint32_t CommunitySystem_Update = RED_ADDRESS_MACOS_UNAVAILABLE(155956
 
 constexpr uint32_t EngineTime_Frequency = RED_ADDRESS_MACOS_UNAVAILABLE(3151104823);
 
-constexpr uint32_t Entity_Attach = RED_ADDRESS_MACOS_UNAVAILABLE(4248638169);
-constexpr uint32_t Entity_Detach = RED_ADDRESS_MACOS_UNAVAILABLE(2263681375);
-constexpr uint32_t Entity_Dispose = RED_ADDRESS_MACOS_UNAVAILABLE(2515274237);
-constexpr uint32_t Entity_Initialize = RED_ADDRESS_MACOS_UNAVAILABLE(3490519617);
+constexpr uint32_t Entity_Attach = 4248638169;
+constexpr uint32_t Entity_Detach = 2263681375;
+constexpr uint32_t Entity_Dispose = 2515274237;
+constexpr uint32_t Entity_Initialize = 3490519617;
 constexpr uint32_t Entity_Assemble = RED_ADDRESS_MACOS_UNAVAILABLE(2182550867);
 constexpr uint32_t Entity_Reassemble = 1560690857;
-constexpr uint32_t Entity_Uninitialize = RED_ADDRESS_MACOS_UNAVAILABLE(3596356635);
+constexpr uint32_t Entity_Uninitialize = 3596356635;
 constexpr uint32_t Entity_RequestComponents = RED_ADDRESS_MACOS_UNAVAILABLE(2296260874);
 constexpr uint32_t Entity_ResolveRecordID = RED_ADDRESS_MACOS_UNAVAILABLE(525805301);
 

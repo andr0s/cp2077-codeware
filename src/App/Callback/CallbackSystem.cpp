@@ -4,7 +4,12 @@
 #include "App/Callback/Controllers/EntityAttachHook.hpp"
 #include "App/Callback/Controllers/EntityDetachHook.hpp"
 #include "App/Callback/Controllers/EntityExtractHook.hpp"
+#if defined(__APPLE__)
+#include "App/Callback/Controllers/EntityInitializeHook.hpp"
+#include "App/Callback/Controllers/EntityReassembleHook.hpp"
+#else
 #include "App/Callback/Controllers/EntityRequestComponentsHook.hpp"
+#endif
 #include "App/Callback/Controllers/EntityUninitializeHook.hpp"
 #include "App/Callback/Controllers/GameSessionController.hpp"
 #include "App/Callback/Controllers/InkSpawningController.hpp"
@@ -27,7 +32,14 @@ App::CallbackSystem::CallbackSystem()
     RegisterController<EntityAssembleHook>();
     RegisterController<EntityAttachHook>();
     RegisterController<EntityDetachHook>();
+#if defined(__APPLE__)
+    // macOS: Entity::RequestComponents is inlined into Entity::Initialize and Entity::Reassemble, so the events come
+    // from the hooks upstream used before (before Initialize, with the entity ID already set, and before Reassemble).
+    RegisterController<EntityInitializeHook>();
+    RegisterController<EntityReassembleHook>();
+#else
     RegisterController<EntityRequestComponentsHook>();
+#endif
     RegisterController<EntityUninitializeHook>();
     RegisterController<ComponentToggleHook>();
     RegisterController<VehicleLightControlHook>();

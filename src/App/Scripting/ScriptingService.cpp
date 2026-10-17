@@ -43,6 +43,28 @@ App::ScriptingService::ScriptingService(const std::filesystem::path& aStateDir)
 
 void App::ScriptingService::OnBootstrap()
 {
+#if defined(__APPLE__)
+    // macOS: a hook whose address is not verified is not installed, and the plugin keeps loading (fail closed, one
+    // log line each). The validator hooks are what let Codeware's script imports pass the game's script validation,
+    // so their absence is an error. ScriptValidator::CompareTypeName is inlined on macOS: its name fallback runs
+    // after ValidateProperty and CompareType instead (see OnValidateProperty and OnValidateScriptType).
+    if (!HookBefore<Raw::ScriptValidator::Validate>(&OnValidateScripts))
+        LogError("[macOS] Script validation hook (ScriptValidator::Validate) is not available.");
+    if (!Raw::ScriptValidator::CompareType || !Hook<Raw::ScriptValidator::ValidateProperty>(&OnValidateProperty))
+        LogError("[macOS] Script property validation hook (ScriptValidator::ValidateProperty) is not available.");
+    if (!HookAfter<Raw::ScriptBundle::Destruct>(&OnInitializeScripts))
+        LogError("[macOS] Scriptable services are disabled: ScriptBundle destructor hook is not available.");
+    if (!HookAfter<Raw::CGameFramework::InitializeGameInstance>(&OnInitializeGameInstance))
+        LogWarning("[macOS] ScriptableService.OnInitialize is disabled: game instance hook is not available.");
+    if (!HookAfter<Raw::ScriptOpCodes::Register>(&OnRegisterScriptOpCodes))
+        LogWarning("[macOS] The new/cast opcode extensions are disabled: opcode registration hook is not available.");
+    if (Raw::ScriptOpCodes::Handlers && Raw::ScriptOpCodes::Handlers[Raw::ScriptOpCodes::New])
+        OnRegisterScriptOpCodes(); // The game registered its opcodes before this plugin was loaded.
+    if (!HookAfter<Raw::CClass::CreateInstance>(&OnCreateInstance))
+        LogWarning("[macOS] OnConstruct callbacks are disabled: CClass::CreateInstance hook is not available.");
+    if (!Hook<Raw::GetScriptGameInstance>(&GetScriptGameInstance))
+        LogWarning("[macOS] GetGameInstance() override is disabled: its native is not available.");
+#else
     HookAfter<Raw::ScriptBundle::Destruct>(&OnInitializeScripts).OrThrow();
     HookAfter<Raw::CGameFramework::InitializeGameInstance>(&OnInitializeGameInstance).OrThrow();
     HookBefore<Raw::ScriptValidator::Validate>(&OnValidateScripts).OrThrow();
@@ -51,6 +73,7 @@ void App::ScriptingService::OnBootstrap()
     HookAfter<Raw::ScriptOpCodes::Register>(&OnRegisterScriptOpCodes).OrThrow();
     HookAfter<Raw::CClass::CreateInstance>(&OnCreateInstance).OrThrow();
     Hook<Raw::GetScriptGameInstance>(&GetScriptGameInstance).OrThrow();
+#endif
 }
 
 void App::ScriptingService::OnInitializeScripts()
@@ -70,6 +93,10 @@ void App::ScriptingService::OnInitializeScripts()
 
 void App::ScriptingService::OnInitializeGameInstance()
 {
+#if defined(__APPLE__)
+    if (!ScriptableServiceContainer::Get())
+        return; // macOS: the container is built by the ScriptBundle hook, which may be unavailable
+#endif
     ScriptableServiceContainer::Get()->OnInitializeGameInstance();
 }
 
@@ -154,7 +181,12 @@ bool App::ScriptingService::OnValidateProperty(void* aValidator, Red::ScriptProp
         return true;
     }
 
+#if defined(__APPLE__)
+    return Raw::ScriptValidator::ValidateProperty(aValidator, aScriptProp, aNativeProp)
+        || OnValidateTypeNameFallback(nativeType, scriptType);
+#else
     return Raw::ScriptValidator::ValidateProperty(aValidator, aScriptProp, aNativeProp);
+#endif
 }
 
 bool App::ScriptingService::OnValidateScriptType(Red::CBaseRTTIType* aNativeType, Red::ScriptType* aScriptType)
@@ -185,8 +217,39 @@ bool App::ScriptingService::OnValidateScriptType(Red::CBaseRTTIType* aNativeType
         return false;
     }
 
+#if defined(__APPLE__)
+    return Raw::ScriptValidator::CompareType(aNativeType, aScriptType)
+        || OnValidateTypeNameFallback(aNativeType, aScriptType);
+#else
     return Raw::ScriptValidator::CompareType(aNativeType, aScriptType);
+#endif
 }
+
+#if defined(__APPLE__)
+bool App::ScriptingService::OnValidateTypeNameFallback(Red::CBaseRTTIType* aNativeType, Red::ScriptType* aScriptType)
+{
+    // macOS: ValidateProperty (0x1021FCFB8) and CompareType (0x1021FD144) compare the script type name with the native
+    // type name inline (and through CRTTISystem::ConvertScriptToNativeName). These are the names they compare for a
+    // primitive and for a class or struct type; the Windows CompareTypeName hook gets the same pair.
+    Red::CName scriptTypeName;
+    if (aScriptType->metaType == Red::EScriptType::Primitive)
+    {
+        scriptTypeName = aScriptType->name;
+    }
+    else if (aScriptType->metaType == Red::EScriptType::Class)
+    {
+        scriptTypeName = aScriptType->innerType ? aScriptType->innerType->name : aScriptType->name;
+    }
+    else
+    {
+        return false;
+    }
+
+    bool valid = false;
+    OnValidateTypeName(valid, scriptTypeName, aNativeType->GetName());
+    return valid;
+}
+#endif
 
 void App::ScriptingService::OnValidateTypeName(bool& aValid, Red::CName aScriptTypeName, Red::CName aNativeTypeName)
 {

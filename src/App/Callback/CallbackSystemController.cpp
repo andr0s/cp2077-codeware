@@ -14,7 +14,15 @@ bool App::CallbackSystemController::ActivateEvent(Red::CName aEvent)
 
         if (!m_initialized)
         {
+#if defined(__APPLE__)
+            // macOS: the hooks of an event whose game function is not located are refused; the event never fires.
+            if (!OnActivateHook())
+            {
+                LogWarning("[macOS] Callback event \"{}\" is not available on macOS.", aEvent.ToString());
+            }
+#else
             OnActivateHook();
+#endif
             m_initialized = true;
         }
     }

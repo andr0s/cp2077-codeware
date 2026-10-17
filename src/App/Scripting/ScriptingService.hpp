@@ -28,6 +28,9 @@ protected:
     static bool OnValidateProperty(void* aValidator, Red::ScriptProperty* aScriptProp, Red::CProperty* aNativeProp);
     static bool OnValidateScriptType(Red::CBaseRTTIType* aNativeType, Red::ScriptType* aScriptType);
     static void OnValidateTypeName(bool& aValid, Red::CName aScriptTypeName, Red::CName aNativeTypeName);
+#if defined(__APPLE__)
+    static bool OnValidateTypeNameFallback(Red::CBaseRTTIType* aNativeType, Red::ScriptType* aScriptType);
+#endif
     static void OnRegisterScriptOpCodes();
     static void ScriptOpCodeNew(Red::IScriptable*, Red::CStackFrame* aFrame, void* aRet, Red::CBaseRTTIType*);
     static void ScriptOpCodeCast(Red::IScriptable*, Red::CStackFrame* aFrame, void* aRet, Red::CBaseRTTIType*);

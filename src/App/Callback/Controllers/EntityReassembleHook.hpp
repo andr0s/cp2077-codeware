@@ -37,13 +37,13 @@ protected:
     {
         aEntity->appearanceName = aNewAppearance;
 
-        auto compCount = aEntity->components.size;
+        auto compCount = aEntity->components.Size();
 
         CallbackSystem::Get()->DispatchNativeEvent<EntityLifecycleEvent>(EventName, Red::AsWeakHandle(aEntity));
 
-        if (compCount != aEntity->components.size)
+        if (compCount != aEntity->components.Size())
         {
-            while (compCount < aEntity->components.size)
+            while (compCount < aEntity->components.Size())
             {
                 aNewComponents.PushBack(aEntity->components[compCount]);
                 ++compCount;

@@ -31,7 +31,8 @@ protected:
         return !IsHooked<Raw::Entity::Initialize>() || Unhook<Raw::Entity::Initialize>();
     }
 
-    inline static void OnInitialize(Red::Entity* aEntity, uintptr_t a2, Red::EntityInitializeRequest* aRequest)
+    inline static void OnInitialize(Red::Entity* aEntity, Red::JobQueue& aJobQueue,
+                                    Red::EntityInitializeRequest* aRequest)
     {
         if (aRequest->entityID)
         {
