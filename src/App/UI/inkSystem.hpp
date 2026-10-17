@@ -48,6 +48,16 @@ struct inkSystem : Red::IGameSystem
                 {
                     Red::DynArray<Red::WeakHandle<Red::inkIGameController>> controllers;
 
+#if defined(__APPLE__)
+                    for (const auto& component : Raw::inkWorldLayer::Components::Ref(worldLayer.instance))
+                    {
+                        auto window = component->GetWindow();
+                        if (window)
+                        {
+                            controllers.PushBack(Raw::IWidgetComponentWrapper::GetGameController(component.instance));
+                        }
+                    }
+#else
                     for (const auto& component : worldLayer->components)
                     {
                         auto window = component->GetWindow();
@@ -56,6 +66,7 @@ struct inkSystem : Red::IGameSystem
                             controllers.PushBack(component->GetGameController());
                         }
                     }
+#endif
 
                     return controllers;
                 }

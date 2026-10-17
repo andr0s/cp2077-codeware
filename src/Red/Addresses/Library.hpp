@@ -49,24 +49,24 @@ constexpr uint32_t EntitySpawner_SpawnEntity = 3068279668;
 constexpr uint32_t EntitySpawnerToken_dtor = 552341017;
 constexpr uint32_t EntitySpawnerToken_GetWaitHandle = RED_ADDRESS_MACOS_UNAVAILABLE(2091718968);
 
-constexpr uint32_t InkLayer_RegisterListener = RED_ADDRESS_MACOS_UNAVAILABLE(4792499);
-constexpr uint32_t InkLayer_AttachWidgetTree = RED_ADDRESS_MACOS_UNAVAILABLE(2050958960);
+constexpr uint32_t InkLayer_RegisterListener = 4792499;
+constexpr uint32_t InkLayer_AttachWidgetTree = 2050958960;
 
-constexpr uint32_t InkLogicController_OnInitialize = RED_ADDRESS_MACOS_UNAVAILABLE(2671382832);
-constexpr uint32_t InkLogicController_OnUninitialize = RED_ADDRESS_MACOS_UNAVAILABLE(1159862457);
-constexpr uint32_t InkLogicController_OnArrangeChildrenComplete = RED_ADDRESS_MACOS_UNAVAILABLE(3589084925);
+constexpr uint32_t InkLogicController_OnInitialize = 2671382832;
+constexpr uint32_t InkLogicController_OnUninitialize = 1159862457;
+constexpr uint32_t InkLogicController_OnArrangeChildrenComplete = 3589084925;
 
 constexpr uint32_t InkSpawner_FinishAsyncSpawn = 2698985195;
 
 constexpr uint32_t InkSystem_Instance = 2635337807;
-constexpr uint32_t InkSystem_ProcessCharacterEvent = RED_ADDRESS_MACOS_UNAVAILABLE(4284882427);
-constexpr uint32_t InkSystem_ProcessInputEvents = RED_ADDRESS_MACOS_UNAVAILABLE(673454961);
+constexpr uint32_t InkSystem_ProcessCharacterEvent = 4284882427;
+constexpr uint32_t InkSystem_ProcessInputEvents = 673454961;
 
-constexpr uint32_t InkWidget_GetLayer = RED_ADDRESS_MACOS_UNAVAILABLE(1667176558);
-constexpr uint32_t InkWidget_SetLayer = RED_ADDRESS_MACOS_UNAVAILABLE(2516523266);
-constexpr uint32_t InkWidget_ScriptReparent = RED_ADDRESS_MACOS_UNAVAILABLE(492509908);
-constexpr uint32_t InkWidget_ScriptAddChild = RED_ADDRESS_MACOS_UNAVAILABLE(3558023194);
-constexpr uint32_t InkWidget_TriggerEvent = RED_ADDRESS_MACOS_UNAVAILABLE(3357288308);
+constexpr uint32_t InkWidget_GetLayer = 1667176558;
+constexpr uint32_t InkWidget_SetLayer = 2516523266;
+constexpr uint32_t InkWidget_ScriptReparent = 492509908;
+constexpr uint32_t InkWidget_ScriptAddChild = 3558023194;
+constexpr uint32_t InkWidget_TriggerEvent = 3357288308;
 
 constexpr uint32_t InkWidgetLibrary_AsyncSpawnFromExternal = 1396063719;
 constexpr uint32_t InkWidgetLibrary_AsyncSpawnFromLocal = 118698863;
