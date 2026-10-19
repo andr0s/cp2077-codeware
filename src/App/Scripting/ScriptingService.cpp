@@ -271,6 +271,14 @@ void App::ScriptingService::OnValidateTypeName(bool& aValid, Red::CName aScriptT
         {
             aValid = strncmp(CurveDataPrefix.data(), aNativeTypeName.ToString(), CurveDataPrefix.size() - 1) == 0;
         }
+#if defined(__APPLE__)
+        // macOS (LP64): native fields of C++ type long are registered as MemInt, a pointer-sized integer (8 bytes, signed
+        // on arm64). The script imports, generated from the Windows game, declare them Int64 (e.g. toolsMessage.created).
+        else if (aScriptTypeName == Red::CName("Int64"))
+        {
+            aValid = aNativeTypeName == Red::CName("MemInt");
+        }
+#endif
     }
 }
 
