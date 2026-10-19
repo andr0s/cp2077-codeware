@@ -99,7 +99,7 @@ void Support::SpdlogProvider::LogInfo(const std::string_view& aMessage)
 #if !defined(_WIN32) && !defined(_WIN64)
     {
         std::scoped_lock _{m_logMutex};
-        if (OpenLog())
+        if (OpenLog(aMessage.size() + 9))
         {
             m_logFile << "[INFO] " << aMessage << '\n';
         }
@@ -114,7 +114,7 @@ void Support::SpdlogProvider::LogWarning(const std::string_view& aMessage)
 #if !defined(_WIN32) && !defined(_WIN64)
     {
         std::scoped_lock _{m_logMutex};
-        if (OpenLog())
+        if (OpenLog(aMessage.size() + 9))
         {
             m_logFile << "[WARN] " << aMessage << '\n';
             m_logFile.flush();
@@ -130,7 +130,7 @@ void Support::SpdlogProvider::LogError(const std::string_view& aMessage)
 #if !defined(_WIN32) && !defined(_WIN64)
     {
         std::scoped_lock _{m_logMutex};
-        if (OpenLog())
+        if (OpenLog(aMessage.size() + 9))
         {
             m_logFile << "[ERROR] " << aMessage << '\n';
             m_logFile.flush();
@@ -146,7 +146,7 @@ void Support::SpdlogProvider::LogDebug(const std::string_view& aMessage)
 #if !defined(_WIN32) && !defined(_WIN64)
     {
         std::scoped_lock _{m_logMutex};
-        if (OpenLog())
+        if (OpenLog(aMessage.size() + 9))
         {
             m_logFile << "[DEBUG] " << aMessage << '\n';
         }
@@ -167,9 +167,17 @@ void Support::SpdlogProvider::LogFlush()
 #endif
 }
 
-bool Support::SpdlogProvider::OpenLog()
+bool Support::SpdlogProvider::OpenLog(size_t aLineBytes)
 {
     if (!m_logFile.is_open() && !m_resolvedLogPath.empty())
+    {
         m_logFile.open(m_resolvedLogPath, std::ios::app);
-    return m_logFile.is_open();
+        std::error_code error;
+        const auto size = std::filesystem::file_size(m_resolvedLogPath, error);
+        m_logBytes = error ? 0 : static_cast<size_t>(size);
+    }
+    if (!m_logFile.is_open() || m_logBytes + aLineBytes > m_maxPartSize * m_maxPartCount)
+        return false;
+    m_logBytes += aLineBytes;
+    return true;
 }

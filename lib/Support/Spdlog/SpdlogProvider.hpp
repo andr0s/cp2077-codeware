@@ -72,7 +72,10 @@ protected:
     // Kept open and buffered: opening the file and echoing to the terminal for every line stalled the game thread
     // (ArchiveXL logs thousands of lines while meshes stream in). Flushed on warnings, errors and shutdown.
     std::ofstream m_logFile;
-    bool OpenLog();
+    size_t m_logBytes{ 0 };
+    // Opens the log if needed and reserves room for a line; false once the file reaches the size the Windows build
+    // rotates at (there is no rotating sink here), so a script that logs in a loop cannot fill the disk.
+    bool OpenLog(size_t aLineBytes);
     bool m_appendTimestamp{ false };
     bool m_recentSymlink{ false };
     int32_t m_maxLogCount{ 10 };
