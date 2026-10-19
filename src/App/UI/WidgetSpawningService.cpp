@@ -12,11 +12,17 @@ Red::ClassLocator<Red::ink::WidgetLogicController> s_logicControllerType;
 
 void App::WidgetSpawningService::OnBootstrap()
 {
+#if defined(__APPLE__)
+    // Off on macOS for now: the game crashed in its ink spawn jobs with Codeware's UI hooks in place, and none of the
+    // mods in use (BT-7274, REDCheatMenu2) needs them.
+    LogInfo("[macOS] Widget spawning hooks are off.");
+#else
     Hook<Raw::InkWidgetLibrary::SpawnFromLocal>(&OnSpawnLocal).OrThrow();
     Hook<Raw::InkWidgetLibrary::SpawnFromExternal>(&OnSpawnExternal).OrThrow();
     Hook<Raw::InkWidgetLibrary::AsyncSpawnFromLocal>(&OnAsyncSpawnLocal).OrThrow();
     Hook<Raw::InkWidgetLibrary::AsyncSpawnFromExternal>(&OnAsyncSpawnExternal).OrThrow();
     HookBefore<Raw::InkSpawner::FinishAsyncSpawn>(&OnFinishAsyncSpawn).OrThrow();
+#endif
 }
 
 void App::WidgetSpawningService::OnShutdown()
@@ -63,9 +69,19 @@ Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnS
 Red::Handle<Red::ink::WidgetLibraryItemInstance> App::WidgetSpawningService::OnSpawnExternal(
     Red::ink::WidgetLibraryResource& aLibrary, Red::ResourcePath aExternalPath, Red::CName aItemName)
 {
-    InjectDependency(aLibrary, aExternalPath);
+    if (!aExternalPath || IsDependency(aLibrary, aExternalPath))
+    {
+        return Raw::InkWidgetLibrary::SpawnFromExternal(aLibrary, aExternalPath, aItemName);
+    }
 
-    return Raw::InkWidgetLibrary::SpawnFromExternal(aLibrary, aExternalPath, aItemName);
+    auto* externalLibrary = LoadDependency(aExternalPath);
+
+    if (!externalLibrary)
+    {
+        return {};
+    }
+
+    return Raw::InkWidgetLibrary::SpawnFromLocal(*externalLibrary, aItemName);
 }
 
 bool App::WidgetSpawningService::OnAsyncSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
@@ -90,9 +106,62 @@ bool App::WidgetSpawningService::OnAsyncSpawnExternal(Red::ink::WidgetLibraryRes
                                                       Red::CName aItemName,
                                                       bool a5)
 {
-    InjectDependency(aLibrary, aExternalPath);
+    if (!aExternalPath || IsDependency(aLibrary, aExternalPath))
+    {
+        return Raw::InkWidgetLibrary::AsyncSpawnFromExternal(aLibrary, aSpawningInfo, aExternalPath, aItemName, a5);
+    }
 
-    return Raw::InkWidgetLibrary::AsyncSpawnFromExternal(aLibrary, aSpawningInfo, aExternalPath, aItemName, a5);
+    auto* externalLibrary = LoadDependency(aExternalPath);
+
+    return externalLibrary &&
+           Raw::InkWidgetLibrary::AsyncSpawnFromLocal(*externalLibrary, aSpawningInfo, aItemName, a5);
+}
+
+// Windows Codeware appends a library that aLibrary does not list to aLibrary.externalLibraries (InjectDependency).
+// Here the dispatcher threads spawn from the same library at the same time and walk that array without a lock; the
+// game's lookup (0x104965C90) also re-reads its end after the search. An append there made them read past the array
+// or freed memory (crash in the ink spawn jobs). So the game's array is never changed: an unlisted library is loaded
+// and kept here, and the item is spawned from it as a local one. That is what the game's external spawns do once they
+// have found the library (0x104965B38, 0x104965EC0).
+bool App::WidgetSpawningService::IsDependency(Red::ink::WidgetLibraryResource& aLibrary,
+                                              Red::ResourcePath aExternalPath)
+{
+    for (const auto& externalLibrary : aLibrary.externalLibraries)
+    {
+        if (externalLibrary.path == aExternalPath)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Red::ink::WidgetLibraryResource* App::WidgetSpawningService::LoadDependency(Red::ResourcePath aExternalPath)
+{
+    // Never destroyed: at exit the game's resource system is gone before static destructors would run.
+    static auto* s_libraries = new Core::Map<uint64_t, Red::Ref<Red::ink::WidgetLibraryResource>>();
+
+    std::unique_lock _(s_mutex);
+
+    auto& externalLibrary = (*s_libraries)[aExternalPath.hash];
+    const auto isNew = !externalLibrary.token;
+
+    if (isNew)
+    {
+        externalLibrary.path = aExternalPath;
+        externalLibrary.LoadAsync();
+    }
+
+    Red::WaitForResource(externalLibrary, std::chrono::milliseconds(1000));
+
+    if (isNew)
+    {
+        LogInfo("[WidgetSpawningService] External library {:016X}: {}", aExternalPath.hash,
+                externalLibrary.IsLoaded() ? "loaded" : "not loaded");
+    }
+
+    return externalLibrary.IsLoaded() ? externalLibrary.Get().instance : nullptr;
 }
 #else
 uintptr_t App::WidgetSpawningService::OnSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,

@@ -3,12 +3,9 @@
 void App::WidgetBuildingService::OnBootstrap()
 {
 #if defined(__APPLE__)
-    if (!HookAfter<Raw::inkWidget::ScriptReparent>(&AfterReparentFromScript))
-        LogWarning("[macOS] Attaching reparented widgets to their layer is not available on macOS.");
-    if (!HookAfter<Raw::inkCompoundWidget::ScriptAddChild>(&AfterAddChildFromScript))
-        LogWarning("[macOS] Attaching added child widgets to their layer is not available on macOS.");
-    if (!Hook<Raw::inkLogicController::OnInitialize>(&OnInitializeController))
-        LogWarning("[macOS] Logic controller initialization for script-built widgets is not available on macOS.");
+    // Off on macOS for now: the game crashed in its ink spawn jobs with Codeware's UI hooks in place, and none of the
+    // mods in use (BT-7274, REDCheatMenu2) needs them.
+    LogInfo("[macOS] Widget building hooks are off.");
 #else
     HookAfter<Raw::inkWidget::ScriptReparent>(&AfterReparentFromScript).OrThrow();
     HookAfter<Raw::inkCompoundWidget::ScriptAddChild>(&AfterAddChildFromScript).OrThrow();

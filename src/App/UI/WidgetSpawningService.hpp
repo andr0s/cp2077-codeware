@@ -36,6 +36,9 @@ protected:
                                      Red::ResourcePath aExternalPath,
                                      Red::CName aItemName,
                                      bool a5);
+
+    static bool IsDependency(Red::ink::WidgetLibraryResource& aLibrary, Red::ResourcePath aExternalPath);
+    static Red::ink::WidgetLibraryResource* LoadDependency(Red::ResourcePath aExternalPath);
 #else
     static uintptr_t OnSpawnLocal(Red::ink::WidgetLibraryResource& aLibrary,
                                   Red::Handle<Red::ink::WidgetLibraryItemInstance>& aInstance,
