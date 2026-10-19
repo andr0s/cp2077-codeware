@@ -12,8 +12,9 @@ App::ResourcePathRegistry::ResourcePathRegistry(const std::filesystem::path& aPr
 #if defined(__APPLE__)
     // macOS: keep the registry local instead of sharing it through the RTTI system at plugin load (as the ArchiveXL
     // macOS port does). Each plugin then keeps its own map and its own ResourcePath::Create hook.
-    static SharedInstance s_localInstance;
-    s_instance = &s_localInstance;
+    // Never destroyed: the ResourcePath::Create hook can still run on game threads while static destructors do.
+    static auto* s_localInstance = new SharedInstance();
+    s_instance = s_localInstance;
 #else
     s_instance = Red::AcquireSharedInstance<SharedName, SharedInstance>();
 #endif
