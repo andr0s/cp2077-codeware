@@ -1252,6 +1252,9 @@ struct EnumDefinition
         auto* rtti = CRTTISystem::Get();
         auto* type = reinterpret_cast<Descriptor*>(rtti->GetEnum(name));
 
+        if (!type) // RegisterType left the enum out (no native CEnum vtable found on macOS)
+            return;
+
         constexpr auto min = Detail::GetMinValue<Specialization, TEnum>();
         constexpr auto max = Detail::GetMaxValue<Specialization, TEnum>();
 
